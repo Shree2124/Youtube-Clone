@@ -14,7 +14,10 @@ app.use(
 
 
 app.get("/",(req, res)=>{
-  res.send("hello")
+  const data = {
+    user: "hello"
+  }
+  res.send(data)
 })
 
 // ⁡⁢⁣⁢+⁡ configuration of data: -
