@@ -7,8 +7,10 @@ import { login } from "../../redux/userSlice";
 // import { signInWithPopup } from "firebase/auth";
 // import { async } from "@firebase/util";
 import { useNavigate } from "react-router-dom";
-const cookies = new Cookies();
-const checkToken = cookies.get("checkToken");
+// import axios from "../../api/axios.js";
+
+// const cookies = new Cookies();
+// const checkToken = cookies.get("checkToken");
 
 const Container = styled.div`
   display: flex;
