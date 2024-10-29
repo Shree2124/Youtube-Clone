@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import ImgLogo from "../../Logo/logo-color.png";
 import { Avatar } from "@mui/material";
+import axios from "../../api/axios";
 
 const Container = styled.div`
   display: flex;
@@ -34,28 +35,26 @@ font-size: 0.87rem;
   color: ${({ theme }) => theme.text};
 `;
 
-const Comment = () => {
+const Comment = ({comment}) => {
+  const [channel, setChannel] = useState({})
+
+  useEffect(()=>{
+    const fetch = async ()=>{
+      const res = await axios.get(`/users/find/${comment.userId}`)
+      console.log(res.data);
+      setChannel(res.data.data)
+    }
+    fetch()
+  },[comment.userId])
+
   return (
     <Container>
-      <Avatar
-        src={ImgLogo}
-        sx={{
-          height: "2.5rem",
-          width: "2.5rem",
-        }}
-      />
+      <Avatar src={channel.img} />
       <Details>
         <Name>
-          Chanel
-          <Date>8 jun</Date>
+          {channel.name} <Date>1 day ago</Date>
         </Name>
-
-        <Text>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Porro et,
-          dolores dicta placeat tempore ratione in. Magnam quos saepe, inventore
-          consequatur a exercitationem dolor odit in numquam at pariatur
-          nostrum.
-        </Text>
+        <Text>{comment.desc}</Text>
       </Details>
     </Container>
   );

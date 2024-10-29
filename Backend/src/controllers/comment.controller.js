@@ -4,15 +4,19 @@ import { ApiError } from "../utils/ApiError.js";
 import { Comment } from "../models/comment.model.js";
 import { Video } from "../models/video.model.js";
 
-const addComment = async (req, res, next) => {
-  const newComment = new Comment({ ...req.body, userId: req.user.id });
-  try {
-    const savedComment = await newComment.save();
-    res.status(200).json(new ApiResponse(201,savedComment));
-  } catch (err) {
-    next(err);
-  }
-};
+const addComment = asyncHandler( async (req, res, next) => {
+  const {desc, videoId} = req.body;
+
+  if(!desc) return new ApiError(400, "Description is required")
+
+  const newComment = await Comment.create({
+      desc,
+      videoId,
+      userId: req?.user?.id
+    })
+    console.log(newComment)
+    res.status(200).json(new ApiResponse(201, newComment));
+});
 
 const deleteComment = asyncHandler(async (req, res) => {
   const comment = await Comment.findById(res.params.id);
@@ -27,7 +31,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 
 const getComments = asyncHandler(async (req, res) => {
   const comments = await Comment.find({ videoId: req.params.videoId });
-  res.status(200).json(new ApiResponse(201,comments,"Success"))
+  res.status(200).json(new ApiResponse(201, comments, "Success"))
 });
 
 export { addComment, deleteComment, getComments };

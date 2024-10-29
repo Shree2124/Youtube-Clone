@@ -3,39 +3,46 @@ import { Box, Drawer, IconButton } from "@mui/material";
 import MobileContext from "../context/MobileContext.js";
 import styled from "styled-components";
 import ImgLogo from "../../Logo/logo-color.png";
-import HomeIcon from "@mui/icons-material/Home";
-import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
-import SubscriptionsOutlinedIcon from "@mui/icons-material/SubscriptionsOutlined";
-import VideoLibraryOutlinedIcon from "@mui/icons-material/VideoLibraryOutlined";
-import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
-import LibraryMusicOutlinedIcon from "@mui/icons-material/LibraryMusicOutlined";
-import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
-import SportsBasketballOutlinedIcon from "@mui/icons-material/SportsBasketballOutlined";
-import MovieOutlinedIcon from "@mui/icons-material/MovieOutlined";
-import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import LiveTvOutlinedIcon from "@mui/icons-material/LiveTvOutlined";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
-import { useSelector } from "react-redux";
-import { Close } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import {
+  Home as HomeIcon,
+  ExploreOutlined as ExploreOutlinedIcon,
+  SubscriptionsOutlined as SubscriptionsOutlinedIcon,
+  VideoLibraryOutlined as VideoLibraryOutlinedIcon,
+  HistoryOutlined as HistoryOutlinedIcon,
+  LibraryMusicOutlined as LibraryMusicOutlinedIcon,
+  SportsEsportsOutlined as SportsEsportsOutlinedIcon,
+  SportsBasketballOutlined as SportsBasketballOutlinedIcon,
+  MovieOutlined as MovieOutlinedIcon,
+  ArticleOutlined as ArticleOutlinedIcon,
+  LiveTvOutlined as LiveTvOutlinedIcon,
+  AccountCircleOutlined as AccountCircleOutlinedIcon,
+  SettingsOutlined as SettingsOutlinedIcon,
+  FlagOutlined as FlagOutlinedIcon,
+  HelpOutlineOutlined as HelpOutlineOutlinedIcon,
+  SettingsBrightnessOutlined as SettingsBrightnessOutlinedIcon,
+  Close,
+} from "@mui/icons-material";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
-  flex: 1;
+  flex: 4;
+  width: fit-content;
   background-color: ${({ theme }) => theme.bgLighter};
-  height: 100vh;
+  height: 100%;
   color: ${({ theme }) => theme.text};
   font-size: 14px;
-  position: sticky !important;
-  top: 0 !important;
-  overflow: auto !important;
+  position: fixed;
+  overflow: auto;
+  width: "100%";
+    
+  z-index: 10;
 `;
+
 const Wrapper = styled.div`
   padding: 1.12rem 1.6rem;
 `;
+
 const Logo = styled.div`
   display: flex;
   align-items: center;
@@ -65,9 +72,13 @@ const Hr = styled.hr`
   border: 0.5px solid ${({ theme }) => theme.soft};
 `;
 
-const Login = styled.div``;
+const Login = styled.div`
+  width: fit-content;
+  display: "flex";
+`;
+
 const Button = styled.button`
-  padding: 5px 15px;
+  padding: 0.5rem 0.5rem;
   background-color: transparent;
   border: 1px solid #3ea6ff;
   color: #3ea6ff;
@@ -77,7 +88,7 @@ const Button = styled.button`
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 1rem;
 `;
 
 const Title = styled.h2`
@@ -88,158 +99,129 @@ const Title = styled.h2`
 `;
 
 const Menu = ({ darkMode, setDarkMode }) => {
-    const auth = useSelector((state) => state.user.auth);
-    console.log(auth);
+  const auth = useSelector((state) => state.user.auth);
   const [color, setColor] = useState("white");
   const { isMobile, setIsMobile } = useContext(MobileContext);
 
-  const handleMobile = () => {
-    setIsMobile(!isMobile);
-  };
-  const handler = () => {
-    // console.log("In handler");
-    // console.log(isMobile);
-    handleMobile();
-  };
-
   useEffect(() => {
-    if (darkMode) {
-      setColor("white");
-    } else {
-      setColor("black");
-    }
+    setColor(darkMode ? "white" : "black");
   }, [darkMode]);
 
   return (
     <Container>
       <Wrapper>
-        <Logo>
-          <Link
-            to={"/"}
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1rem",
+        {isMobile && (
+          <Box
+            sx={{
+              display: { xs: "block", sm: "block", md: "block", lg: "block" },
+              position: "relative",
+              zIndex: 10,
             }}
           >
-            <Img src={ImgLogo} />
-            LamaTube
-          </Link>
-          {isMobile && (
-            <Box
-              sx={{
-                display: { sx: "block", md: "none" },
-                position: "relative",
-                zIndex: 10,
-                marginLeft: "1rem",
-              }}
-            >
-              <IconButton
-                sx={{
-                  color: { color },
+            <Logo>
+              <Link
+                to={"/"}
+                style={{
+                  textDecoration: "none",
+                  color: "inherit",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "1rem",
                 }}
-                onClick={handler}
               >
-                {isMobile && <Close />}
-              </IconButton>
-            </Box>
-          )}
-        </Logo>
+                <Img src={ImgLogo} />
+                <p>TuneTube</p>
+              </Link>
 
-        <Link
-          to={"/"}
-          style={{ textDecoration: "none", color: "inherit" }}
-          onClick={handler}
-        >
+              <IconButton sx={{ color }} onClick={() => setIsMobile(!isMobile)}>
+                <Close />
+              </IconButton>
+            </Logo>
+          </Box>
+        )}
+        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
           <Item>
-            <HomeIcon />
-            Home
+            {" "}
+            <HomeIcon /> Home{" "}
           </Item>
         </Link>
-        <Link
-          to="/trends"
-          style={{ textDecoration: "none", color: "inherit" }}
-          onClick={handler}
-        >
+        <Link to="/trends" style={{ textDecoration: "none", color: "inherit" }}>
           <Item>
-            <ExploreOutlinedIcon />
-            Explore
+            {" "}
+            <ExploreOutlinedIcon /> Explore{" "}
           </Item>
         </Link>
         <Link
           to="/subscriptions"
           style={{ textDecoration: "none", color: "inherit" }}
-          onClick={handler}
         >
           <Item>
-            <SubscriptionsOutlinedIcon />
-            Subscriptions
+            {" "}
+            <SubscriptionsOutlinedIcon /> Subscriptions{" "}
           </Item>
         </Link>
         <Hr />
         <Item>
-          <VideoLibraryOutlinedIcon />
-          Library
+          {" "}
+          <VideoLibraryOutlinedIcon /> Library{" "}
         </Item>
         <Item>
-          <HistoryOutlinedIcon />
-          History
+          {" "}
+          <HistoryOutlinedIcon /> History{" "}
         </Item>
         <Hr />
-        {!auth &&
+        {!auth && (
           <>
-            <Login>
-              Sign in to like videos, comment, and subscribe.
+            <div className="w-auto ">
+              <p>Sign in to like videos, comment, and subscribe.</p>
               <Link to="/signin" style={{ textDecoration: "none" }}>
                 <Button>
                   <AccountCircleOutlinedIcon />
                   SIGN IN
                 </Button>
               </Link>
-            </Login>
+            </div>
             <Hr />
           </>
-        }
+        )}
         <Title>BEST OF LAMATUBE</Title>
         <Item>
-          <LibraryMusicOutlinedIcon />
-          Music
+          {" "}
+          <LibraryMusicOutlinedIcon /> Music{" "}
         </Item>
         <Item>
-          <SportsBasketballOutlinedIcon />
-          Sports
+          {" "}
+          <SportsBasketballOutlinedIcon /> Sports{" "}
         </Item>
         <Item>
-          <SportsEsportsOutlinedIcon />
-          Gaming
+          {" "}
+          <SportsEsportsOutlinedIcon /> Gaming{" "}
         </Item>
         <Item>
-          <MovieOutlinedIcon />
-          Movies
+          {" "}
+          <MovieOutlinedIcon /> Movies{" "}
         </Item>
         <Item>
-          <ArticleOutlinedIcon />
-          News
+          {" "}
+          <ArticleOutlinedIcon /> News{" "}
         </Item>
         <Item>
-          <LiveTvOutlinedIcon />
-          Live
+          {" "}
+          <LiveTvOutlinedIcon /> Live{" "}
         </Item>
         <Hr />
         <Item>
-          <SettingsOutlinedIcon />
-          Settings
+          {" "}
+          <SettingsOutlinedIcon /> Settings{" "}
         </Item>
         <Item>
-          <FlagOutlinedIcon />
-          Report
+          {" "}
+          <FlagOutlinedIcon /> Report{" "}
         </Item>
         <Item>
-          <HelpOutlineOutlinedIcon />
-          Help
+          {" "}
+          <HelpOutlineOutlinedIcon /> Help{" "}
         </Item>
         <Item onClick={() => setDarkMode(!darkMode)}>
           <SettingsBrightnessOutlinedIcon />
@@ -253,27 +235,17 @@ const Menu = ({ darkMode, setDarkMode }) => {
 const MenuLayout = ({ darkMode, setDarkMode }) => {
   const { isMobile, handleClose } = useContext(MobileContext);
 
-  useEffect(() => {
-    // console.log("inside useEffect");
-    // console.log(isMobile);
-    // console.log(handleClose);
-  }, []);
   return (
     <>
-      <Box
-        sx={{
-          display: { xs: "none", md: "block" },
-          height: "100%",
-        }}
-      >
-        <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
-      </Box>
+    <Box sx={{
+      display: {sm: "none", md:"none", xs: "none", lg:"none"},
+      paddingTop: {sm:"2rem", md: "2rem", lg:"4rem", xs: "2rem"}
+    }}>
+
+      <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
+    </Box>
       <Drawer open={isMobile} onClose={handleClose}>
-        <Menu
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-          isMobile={isMobile}
-        />
+        <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
       </Drawer>
     </>
   );

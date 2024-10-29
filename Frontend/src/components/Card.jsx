@@ -4,7 +4,7 @@ import logo from "../Logo/logo-color.png";
 import { Link } from "react-router-dom";
 import { format } from "timeago.js";
 import { LogoDev } from "@mui/icons-material";
-import axios from "axios";
+import axios from "../api/axios";
 
 const Container = styled.div`
   width: ${(props) => (props.type === "sm" ? "max-content" : "25rem")};
@@ -98,33 +98,42 @@ const Info = styled.div`
 
 const Texts = styled.div``;
 
-const Card = ({ type, video, id }) => {
-  const [channel, setChannel] = useState([])
+const Card = ({ type, video }) => {
+  const [channel, setChannel] = useState([]);
 
   useEffect(() => {
-    console.log(video)
-    axios.get(`/api/v1/users/find/${video.userId}`)
-    .then((res)=>{
-      console.log(res.data.data);
-      setChannel(res.data.data)
-    })
-  },[]);
+    console.log(video._id);
+    const fetch = async () => {
+      try {
+        await axios.get(`/users/find/${video?.userId}`).then((res) => {
+          console.log(res);
+          setChannel(res.data.data);
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetch()
+  }, [video]);
   return (
     <Container type={type}>
-      <Link to={`/video/${id}`}>
-        <Image type={type} src={video.imgUrl} />
+      <Link to={`/video/${video._id}`}>
+        <Image type={type} src={video?.imgUrl} />
       </Link>
       <Details type={type}>
-        <ChannelImg type={type} src={channel.avatar} />
+        <ChannelImg type={type} src={channel?.avatar} />
       </Details>
       <Texts>
-        <Title>{video.title}</Title>
-        <ChannelName>{video.Channel}</ChannelName>
+        <Title>{video?.title}</Title>
+        <ChannelName>{channel.name}</ChannelName>
         <Info>
-          {video.views} views • {format(video.createdAt)}
+          {video?.views} views • {format(video?.createdAt)}
         </Info>
       </Texts>
     </Container>
+
+
   );
 };
 

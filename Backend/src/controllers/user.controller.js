@@ -52,31 +52,31 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   console.log(req.files);
 
-  let avatarLocalPath;
-  if (
-    req.files &&
-    Array.isArray(req.files.avatar) &&
-    req.files.avatar.length > 0
-  ) {
-    avatarLocalPath = req.files.avatar[0]?.path;
-  }
+  // let avatarLocalPath;
+  // if (
+  //   req.files &&
+  //   Array.isArray(req.files.avatar) &&
+  //   req.files.avatar.length > 0
+  // ) {
+  //   avatarLocalPath = req.files.avatar[0]?.path;
+  // }
 
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is required");
-  }
+  // if (!avatarLocalPath) {
+  //   throw new ApiError(400, "Avatar file is required");
+  // }
 
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  // const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-  if (!avatar) {
-    throw new ApiError(400, "Avatar file is required");
-  }
+  // if (!avatar) {
+  //   throw new ApiError(400, "Avatar file is required");
+  // }
 
   //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
   const user = await User.create({
     email,
     password,
     name,
-    avatar: avatar?.url
   });
 
   const createdUser = await User.findById(user._id).select("-password");
@@ -134,6 +134,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "Strict",
   };
 
   return res
@@ -249,15 +250,15 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user, "User fetched successfully"));
+    .json(new ApiResponse(200, req?.user, "User fetched successfully"));
 });
 
 const getUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).select("-password -refreshToken");
+  const user = await User.findById(req?.params?.id).select("-password -refreshToken")
   if (!user) {
-    throw new ApiResponse(404, null, "User not found")
+    return new ApiError(404, "User Not Found")
   }
-  res.status(200).json(new ApiResponse(200, user, "User Find Successfully"));
+  return res.status(200).json(new ApiResponse(200, user, "User Find Successfully"));
 })
 
 const updateAccountDetails = asyncHandler(async (req, res) => {

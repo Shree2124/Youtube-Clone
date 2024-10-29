@@ -3,6 +3,9 @@ import Card from "./Card.jsx";
 import Comments from "./Comment/Comments.jsx";
 import Comment from "./Comment/Comment.jsx"
 import Signin from "./Signin/Signin.jsx";
+import Profile from "./Profile/Profile.jsx";
+import UploadVideo from "./UploadVideo/UploadVideo.jsx";
+import Recommendations from "./Recommendations/Recommendations.jsx";
 
 
 export {
@@ -10,5 +13,8 @@ export {
     Card,
     Signin,
     Comments,
-    Comment
+    Comment,
+    Profile,
+    UploadVideo,
+    Recommendations,
 }

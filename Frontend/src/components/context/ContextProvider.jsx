@@ -4,6 +4,8 @@ import MobileContext from './MobileContext.js'
 
 const MobileContextProvider=({children})=> {
     const [isMobile, setIsMobile] = useState(false);
+    console.log(isMobile);
+    
     const handleClose = () => {
         setIsMobile(false);
       };

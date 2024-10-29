@@ -7,7 +7,9 @@ import { uploadOnCloudinary } from "../utils/Cloudinary.js"
 
 const addVideo = asyncHandler(async (req, res) => {
 
-  const {title, des} = req.body
+  const {title, des, tags} = req.body
+  console.log(req);
+  
   if(!title){
     return new ApiError(401, "Title is required")
   }
@@ -17,8 +19,8 @@ const addVideo = asyncHandler(async (req, res) => {
   
   let videoUrlLocalPath;
   let imgUrlLocalPath;
-  // console.log(req.files.videoUrl);
-  // console.log(req.files.imgUrl);
+  console.log(req?.files?.videoUrl);
+  console.log(req?.files?.imgUrl);
   if (
     req?.files &&
     Array.isArray(req?.files?.videoUrl) &&
@@ -33,6 +35,10 @@ const addVideo = asyncHandler(async (req, res) => {
   ) {
     imgUrlLocalPath = req.files?.imgUrl[0]?.path;
   }
+
+  const tagsArr = tags?.split(",")?.map(tag => tag?.trim());
+
+
   // console.log(videoUrlLocalPath);
   // console.log(imgUrlLocalPath);
   if(!videoUrlLocalPath) {return new ApiError(401, "Video file is required")}
@@ -48,6 +54,7 @@ const addVideo = asyncHandler(async (req, res) => {
     userId: req.user.id,
     videoUrl: videoUrl?.url,
     imgUrl: imgUrl?.url,
+    tags: tagsArr ? tagsArr : [] ,
     title,
     des
   })
@@ -95,6 +102,8 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const getVideo = asyncHandler(async (req, res) => {
   const video = await Video.findById(req.params.id);
+  console.log(video);
+  
   res.status(200).json(new ApiResponse(200, video));
 });
 

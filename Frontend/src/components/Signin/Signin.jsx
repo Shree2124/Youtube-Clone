@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import { login } from "../../redux/userSlice";
+import { setUser } from "../../redux/slices/userSlice";
 // import { auth, provider } from "../firebase";
 // import { signInWithPopup } from "firebase/auth";
 // import { async } from "@firebase/util";
@@ -75,8 +75,10 @@ const Link = styled.span`
 `;
 
 const SignIn = () => {
+  const [name1, setName1] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password1, setPassword1] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -84,7 +86,27 @@ const SignIn = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("api/v1/users/login" ,{ name, password }, {withCredentials: true});
+      const res = await axios.post(
+        "api/v1/users/login",
+        { name:name1, password:password1 },
+        { withCredentials: true }
+      );
+      dispatch(setUser(res.data.user));
+      console.log(res.data);
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        "api/v1/users/register",
+        { name, email, password },
+        { withCredentials: true }
+      );
       dispatch(login(res.data));
       console.log(res.data);
       navigate("/");
@@ -93,38 +115,57 @@ const SignIn = () => {
     }
   };
 
-//   const signInWithGoogle = async () => {
-//     dispatch(loginStart());
-//     signInWithPopup(auth, provider)
-//       .then((result) => {
-//         axios
-//           .post("/auth/google", {
-//             name: result.user.displayName,
-//             email: result.user.email,
-//             img: result.user.photoURL,
-//           })
-//           .then((res) => {
-//             console.log(res);
-//             dispatch(loginSuccess(res.data));
-//             navigate("/");
-//           });
-//       })
-//       .catch((error) => {
-//         dispatch(loginFailure());
-//       });
-//   };
+  //   const signInWithGoogle = async () => {
+  //     dispatch(loginStart());
+  //     signInWithPopup(auth, provider)
+  //       .then((result) => {
+  //         axios
+  //           .post("/auth/google", {
+  //             name: result.user.displayName,
+  //             email: result.user.email,
+  //             img: result.user.photoURL,
+  //           })
+  //           .then((res) => {
+  //             console.log(res);
+  //             dispatch(loginSuccess(res.data));
+  //             navigate("/");
+  //           });
+  //       })
+  //       .catch((error) => {
+  //         dispatch(loginFailure());
+  //       });
+  //   };
 
   //TODO: REGISTER FUNCTIONALITY
 
   return (
     <Container>
       <Wrapper>
-        <Title>Sign in</Title>
-        <SubTitle>to continue to TuneTube</SubTitle>
+        <Input
+          placeholder="username"
+          value={name1}
+          onChange={(e) => setName1(e.target.value)}
+        />
+        <Input
+          type="password"
+          value={password1}
+          placeholder="password"
+          onChange={(e) => setPassword1(e.target.value)}
+        />
+        <Button onClick={handleLogin}>Sign in</Button>
+
+
+        <Title>or</Title>
+
         <Input
           placeholder="username"
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+        <Input
+          placeholder="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <Input
           type="password"
@@ -132,20 +173,7 @@ const SignIn = () => {
           placeholder="password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button onClick={handleLogin}>Sign in</Button>
-        <Title>or</Title>
-        
-        <Input
-          placeholder="username"
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input placeholder="email" onChange={(e) => setEmail(e.target.value)} />
-        <Input
-          type="password"
-          placeholder="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button>Sign up</Button>
+        <Button onClick={handleRegister}>Sign up</Button>
       </Wrapper>
       <More>
         English(USA)
