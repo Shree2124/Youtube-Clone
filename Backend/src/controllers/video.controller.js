@@ -6,62 +6,60 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js"
 
 const addVideo = asyncHandler(async (req, res) => {
+  const { title, des, tags } = req.body;
 
-  const {title, des, tags} = req.body
-  console.log(req);
-  
-  if(!title){
-    return new ApiError(401, "Title is required")
+  if (!title) {
+    throw new ApiError(401, "Title is required");
   }
-  if(!des){
-    return new ApiError(401, "Description is required")
+  if (!des) {
+    throw new ApiError(401, "Description is required");
   }
-  
+
+  // Extract file paths for video and image
   let videoUrlLocalPath;
   let imgUrlLocalPath;
-  console.log(req?.files?.videoUrl);
-  console.log(req?.files?.imgUrl);
-  if (
-    req?.files &&
-    Array.isArray(req?.files?.videoUrl) &&
-    req?.files?.videoUrl?.length > 0
-  ) {
-    videoUrlLocalPath = req.files?.videoUrl[0]?.path;
+
+  if (req?.files?.videoUrl && Array.isArray(req.files.videoUrl) && req.files.videoUrl.length > 0) {
+    videoUrlLocalPath = req.files.videoUrl[0].path;
   }
-  if (
-    req.files &&
-    Array.isArray(req.files.imgUrl) &&
-    req.files.imgUrl.length > 0
-  ) {
-    imgUrlLocalPath = req.files?.imgUrl[0]?.path;
+  if (req?.files?.imgUrl && Array.isArray(req.files.imgUrl) && req.files.imgUrl.length > 0) {
+    imgUrlLocalPath = req.files.imgUrl[0].path;
   }
 
-  const tagsArr = tags?.split(",")?.map(tag => tag?.trim());
+  if (!videoUrlLocalPath) {
+    throw new ApiError(401, "Video file is required");
+  }
+  if (!imgUrlLocalPath) {
+    throw new ApiError(401, "Image file is required");
+  }
 
+  const tagsArr = tags ? tags.split(",").map(tag => tag.trim()) : [];
 
-  // console.log(videoUrlLocalPath);
-  // console.log(imgUrlLocalPath);
-  if(!videoUrlLocalPath) {return new ApiError(401, "Video file is required")}
-  if(!imgUrlLocalPath) {return new ApiError(401, "Image file is required")}
+  try {
+    // Upload video and image in parallel
+    const [videoUpload, imageUpload] = await Promise.all([
+      uploadOnCloudinary(videoUrlLocalPath),
+      uploadOnCloudinary(imgUrlLocalPath)
+    ]);
 
+    const videoUrl = videoUpload?.url;
+    const imgUrl = imageUpload?.url;
 
-  const videoUrl = await uploadOnCloudinary(videoUrlLocalPath)
-  const imgUrl = await uploadOnCloudinary(imgUrlLocalPath)
-  // console.log(req.files.imgUrl);
+    // Save video details in the database
+    const saveVideo = await Video.create({
+      userId: req.user.id,
+      videoUrl,
+      imgUrl,
+      tags: tagsArr,
+      title,
+      des
+    });
 
-
-  const saveVideo = await Video.create({
-    userId: req.user.id,
-    videoUrl: videoUrl?.url,
-    imgUrl: imgUrl?.url,
-    tags: tagsArr ? tagsArr : [] ,
-    title,
-    des
-  })
-
-  res
-    .status(200)
-    .json(new ApiResponse(201, saveVideo, "Video uploaded successfully"));
+    res.status(201).json(new ApiResponse(201, saveVideo, "Video uploaded successfully"));
+  } catch (error) {
+    console.error("Error uploading files:", error);
+    throw new ApiError(500, "File upload failed");
+  }
 });
 
 const updateVideo = asyncHandler(async (req, res) => {

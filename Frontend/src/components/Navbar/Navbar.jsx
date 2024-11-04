@@ -99,7 +99,7 @@ const DropdownItem = styled(Typography)`
 
 const Navbar = ({ darkMode }) => {
   const [color, setColor] = useState("white");
-  const { auth, user } = useSelector((state) => state.user);
+  const { auth, user } = useSelector((state) => state?.user);
   const { isMobile, setIsMobile } = useContext(MobileContext);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
 

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { TextField, Button } from "@mui/material";
+import { TextField, Button, CircularProgress } from "@mui/material";
 import axios from "../../api/axios";
-import { Label } from "@mui/icons-material";
 
 const FormWrapper = styled.div`
   display: flex;
@@ -55,7 +54,9 @@ const UploadVideo = () => {
     description: "",
     tags: "",
     video: null,
+    thumbnail: null,
   });
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,19 +67,33 @@ const UploadVideo = () => {
     setFormValues({ ...formValues, video: e.target.files[0] });
   };
 
-  const upload = async ()=>{
-    try {
-      await axios.post('/add-video',{
+  const handleThumbnailChange = (e) => {
+    setFormValues({ ...formValues, thumbnail: e.target.files[0] });
+  };
 
-      })
-    } catch (error) {
-      
-    }
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("title", formValues.title);
+    formData.append("des", formValues.description);
+    formData.append("tags", formValues.tags);
+    formData.append("videoUrl", formValues.video);
+    formData.append("imgUrl", formValues.thumbnail);
+
+    try {
+      const response = await axios.post("/video/add-video", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Video uploaded successfully:", response.data);
+    } catch (error) {
+      console.error("Error uploading video:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -104,7 +119,7 @@ const UploadVideo = () => {
           rows={4}
         />
         <StyledTextField
-        placeholder="Tags (comma-separated)"
+          placeholder="Tags (comma-separated)"
           label="Tags"
           variant="outlined"
           name="tags"
@@ -112,16 +127,17 @@ const UploadVideo = () => {
           onChange={handleInputChange}
           fullWidth
         />
-        <Label>
-          Video
-        </Label>
+        <label className="text-white pt-4">Video</label>
         <VideoInput type="file" accept="video/*" onChange={handleVideoChange} />
-        <Label>
-          Thumbnail
-        </Label>
-        <VideoInput type="file" accept="image/*" onChange={handleVideoChange} />
-        <SubmitButton type="submit" variant="contained" fullWidth>
-          Submit
+        <label className="text-white pt-4">Thumbnail</label>
+        <VideoInput type="file" accept="image/*" onChange={handleThumbnailChange} />
+        <SubmitButton
+          type="submit"
+          variant="contained"
+          fullWidth
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
         </SubmitButton>
       </form>
     </FormWrapper>
