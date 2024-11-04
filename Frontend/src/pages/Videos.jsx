@@ -1,51 +1,58 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import logo from "../Logo/logo-color.png";
-import video from "../components/video/vid2.mp4";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
-import ThumbDownIcon from "@mui/icons-material/ThumbDown";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import ThumbUpOutlined from "@mui/icons-material/ThumbUpOutlined";
-import ThumbDown from "@mui/icons-material/ThumbDown";
-import ThumbDownOffAltOutlined from "@mui/icons-material/ThumbDownOffAltOutlined";
-import ReplyOutlined from "@mui/icons-material/ReplyOutlined";
-import AddTaskOutlined from "@mui/icons-material/AddTaskOutlined";
-import { Avatar, Box, ButtonBase, IconButton } from "@mui/material";
-import { Card, Comments, Recommendations } from "../components/index.js";
+import { Avatar } from "@mui/material";
 import axios from "../api/axios.js";
 import { useLocation } from "react-router-dom";
 import { format } from "timeago.js";
 import { useSelector } from "react-redux";
+import { Comments, Recommendations } from "../components/index.js";
 
 const Container = styled.div`
   display: flex;
   gap: 24px;
+  height: 100%;
+  margin-bottom: 5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const Content = styled.div`
+  background-color: ${({ theme }) => theme.bg};
+  color: ${({ theme }) => theme.text};
   flex: 5;
 `;
-const VideoWrapper = styled.div``;
+
+const VideoWrapper = styled.div`
+  width: 100%;
+`;
 
 const Title = styled.h1`
-  font-size: 18px;
+  font-size: 1rem;
   font-weight: 400;
-  margin-top: 20px;
-  margin-bottom: 10px;
+  margin: 20px 0 10px;
   color: ${({ theme }) => theme.text};
+
+  @media (min-width: 768px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const Details = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 `;
 
 const Info = styled.span`
   color: ${({ theme }) => theme.textSoft};
+  font-size: 0.9rem;
 `;
 
 const Buttons = styled.div`
@@ -62,24 +69,29 @@ const Button = styled.div`
 `;
 
 const Hr = styled.hr`
-  margin: 15px 0px;
+  margin: 15px 0;
   border: 0.5px solid ${({ theme }) => theme.soft};
 `;
 
 const Channel = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 15px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
 `;
 
 const ChannelInfo = styled.div`
   display: flex;
   gap: 20px;
-`;
+  align-items: flex-start;
+  flex-direction: column;
 
-const Image = styled.img`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
 `;
 
 const ChannelDetail = styled.div`
@@ -88,138 +100,123 @@ const ChannelDetail = styled.div`
   color: ${({ theme }) => theme.text};
 `;
 
-const ChannelName = styled.span`
-  font-weight: 500;
-`;
-
-const ChannelCounter = styled.span`
-  margin-top: 5px;
-  margin-bottom: 20px;
-  color: ${({ theme }) => theme.textSoft};
-  font-size: 12px;
-`;
-
-const Description = styled.p`
-  font-size: 14px;
-`;
-
-const Subscribe = styled.button`
+const SubscribeButton = styled.button`
   background-color: #cc1a00;
-  font-weight: 500;
   color: white;
   border: none;
   border-radius: 3px;
-  height: max-content;
   padding: 10px 20px;
   cursor: pointer;
+  font-weight: 500;
+`;
+
+const ShowMoreButton = styled.button`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+    margin: 10px auto;
+    background-color: #cc1a00;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+`;
+
+const CommentSection = styled.div`
+  background-color: ${({ theme }) => theme.bg};
+  color: ${({ theme }) => theme.text};
+  transition: max-height 0.3s ease;
+  width: 100%;
+  height: fit-content;
+  max-height: ${(props) => (props.expanded ? "100%" : "120px")}; 
+  overflow: hidden;
+
+  @media (min-width: 768px) {
+    max-height: none;
+  }
 `;
 
 const VideoFrame = styled.video`
-  max-height: 720px;
   width: 100%;
+  max-height: 70vh;
   object-fit: cover;
 `;
+
 const Videos = () => {
-
-  const user = useSelector(state=>state.auth?.user)
-
-  
-
-  // const { user } = useSelector((state) => state.auth);
-  // const dispatch = useDispatch();
-
+  const user = useSelector((state) => state.auth?.user);
   const path = useLocation().pathname.split("/")[2];
-  console.log(path);
-  
-
   const [channel, setChannel] = useState({});
   const [video, setVideo] = useState({});
-  const [recVideos, setRecVideos] = useState(null)
+  const [commentsExpanded, setCommentsExpanded] = useState(false);
 
-
-  const handleSub = ()=>{}
-  const handleDislike = ()=>{}
-  const handleLike = ()=>{}
+  const toggleComments = () => {
+    setCommentsExpanded(!commentsExpanded);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const videoRes = await axios.get(`/video/find/${path}`);
-        setVideo(videoRes.data.data)
-        console.log(video);
-        
-        const res = await axios.get(`/video/random`);
-        setRecVideos(res.data.data)
-        
-        
-        const channelRes = await axios.get(
-          `/users/find/${videoRes.data.data.userId}`
-        );
+        setVideo(videoRes.data.data);
+
+        const channelRes = await axios.get(`/users/find/${videoRes.data.data.userId}`);
         setChannel(channelRes.data);
-        // dispatch(fetchSuccess(videoRes.data));
-      } catch (err) {}
+      } catch (err) {
+        console.error(err);
+      }
     };
     fetchData();
   }, [path]);
-  
 
   return (
     <Container>
-    <Content>
-      <VideoWrapper>
-        <VideoFrame src={video.videoUrl} controls />
-      </VideoWrapper>
-      <Title>{video.title}</Title>
-      <Details>
-        <Info>
-          {video.views} views • {format(video.createdAt)}
-        </Info>
-        <Buttons>
-          <Button onClick={handleLike}>
-            {video.likes?.includes(user?._id) ? (
-              <ThumbUpIcon />
-            ) : (
-              <ThumbUpOutlinedIcon />
-            )}{" "}
-            {video.likes?.length}
-          </Button>
-          <Button onClick={handleDislike}>
-            {video.dislikes?.includes(user?._id) ? (
-              <ThumbDownIcon />
-            ) : (
-              <ThumbDownOffAltOutlinedIcon />
-            )}{" "}
-            Dislike
-          </Button>
-          <Button>
-            <ReplyOutlinedIcon /> Share
-          </Button>
-          <Button>
-            <AddTaskOutlinedIcon /> Save
-          </Button>
-        </Buttons>
-      </Details>
-      <Hr />
-      <Channel>
-        <ChannelInfo>
-          <Avatar  src={channel?.avatar} />
-          <ChannelDetail>
-            <ChannelName>{channel.name}</ChannelName>
-            <ChannelCounter>{channel.subscribers} subscribers</ChannelCounter>
-            <Description>{video.desc}</Description>
-          </ChannelDetail>
-        </ChannelInfo>
-        <Subscribe onClick={handleSub}>
-          {user?.subscribedUsers?.includes(channel._id)
-            ? "SUBSCRIBED"
-            : "SUBSCRIBE"}
-        </Subscribe>
-      </Channel>
-      <Hr />
-      <Comments videoId={path} />
-    </Content>
-    <Recommendations tags={video.tags} />
-  </Container>
+      <Content>
+        <VideoWrapper>
+          <VideoFrame src={video.videoUrl} controls />
+        </VideoWrapper>
+        <Title>{video.title}</Title>
+        <Details>
+          <Info>{video.views} views • {format(video.createdAt)}</Info>
+          <Buttons>
+            <Button>
+              <ThumbUpOutlinedIcon /> {video.likes?.length}
+            </Button>
+            <Button>
+              <ThumbDownOffAltOutlinedIcon /> Dislike
+            </Button>
+            <Button>
+              <ReplyOutlinedIcon /> Share
+            </Button>
+            <Button>
+              <AddTaskOutlinedIcon /> Save
+            </Button>
+          </Buttons>
+        </Details>
+        <Hr />
+        <Channel>
+          <ChannelInfo>
+            <Avatar src={channel?.avatar} />
+            <ChannelDetail>
+              <span>{channel.name}</span>
+              <span>{channel.subscribers} subscribers</span>
+              <p>{video.desc}</p>
+            </ChannelDetail>
+          </ChannelInfo>
+          <SubscribeButton>Subscribe</SubscribeButton>
+        </Channel>
+        <Hr />
+        <CommentSection expanded={commentsExpanded}>
+          <Comments videoId={video._id} />
+        </CommentSection>
+        <ShowMoreButton onClick={toggleComments}>
+          {commentsExpanded ? "Hide Comments" : "Show More Comments"}
+        </ShowMoreButton>
+      </Content>
+      <Recommendations tags={video.tags} />
+    </Container>
   );
 };
 

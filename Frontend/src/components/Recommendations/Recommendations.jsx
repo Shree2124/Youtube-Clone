@@ -1,10 +1,16 @@
-import axios from "../../api/axios.js";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import axios from "../../api/axios.js";
 import Card from "../Card";
 
 const Container = styled.div`
   flex: 2;
+  padding: 0 1rem;
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 const Recommendations = ({ tags }) => {

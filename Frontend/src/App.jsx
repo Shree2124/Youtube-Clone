@@ -4,12 +4,11 @@ import { MenuLayout, Signin } from "./components/index.js";
 import styled, { ThemeProvider } from "styled-components";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import { darkTheme, lightTheme } from "./utils/Theme.js";
-import { Home, Videos, Profile, UploadVideo } from "./pages/index.js";
+import { Home, Videos, UploadVideo } from "./pages/index.js";
 import MobileContextProvider from "./components/context/ContextProvider.jsx";
 import useAuth from "./hooks/useAuth.js";
 import ProfileHome from "./components/Profile/Home.jsx";
 import MyVideos from "./components/Profile/MyVideos.jsx";
-import ProfileLayout from "./components/Layouts/ProfileLayout.jsx";
 
 const Container = styled.div`
   justify-content: space-between;
@@ -61,10 +60,19 @@ function App() {
                       element={<Home type="sub" />}
                     />
                     <Route path="/signin" element={<Signin />} />
-                    <Route path="/upload-video" element={<UploadVideo darkMode={darkMode}/>} />
+                    <Route
+                      path="/upload-video"
+                      element={<UploadVideo darkMode={darkMode} />}
+                    />
                     <Route path="/video/:id" element={<Videos />} />
-                    <Route path="/profile/home" element={<ProfileHome darkMode={darkMode}/>}></Route>
-                    <Route path="/profile/my-videos" element={<MyVideos darkMode={darkMode}/>}></Route>
+                    <Route
+                      path="/profile/home"
+                      element={<ProfileHome darkMode={darkMode} />}
+                    ></Route>
+                    <Route
+                      path="/profile/my-videos"
+                      element={<MyVideos darkMode={darkMode} />}
+                    ></Route>
                   </Routes>
                 </Wrapper>
               </Main>
