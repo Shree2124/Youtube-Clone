@@ -16,7 +16,8 @@ import {
   unsubscribe,
   like,
   dislike,
-  getUser
+  getUser,
+  getMyVideos
 } from "../controllers/user.controller.js";
 // import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -60,6 +61,8 @@ router.route("/like/:videoId").put(verifyJWT, like)
 
 // dislike a video
 router.route("/dislike/:videoId").put(verifyJWT, dislike)
+
+router.route("/get-my-videos").get(verifyJWT, getMyVideos)
 
 
 // router

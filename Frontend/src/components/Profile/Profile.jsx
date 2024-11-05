@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 const Profile = ({ darkMode }) => {
-  const { user } = useSelector((state) => state.user);
+  const {user} = useSelector((state) => state?.user);
+  // console.log(user); 
+  
   const [color, setColor] = useState("white");
 
   useEffect(() => {
@@ -41,16 +43,16 @@ const Profile = ({ darkMode }) => {
         </div>
         <Box>
           <Typography sx={{}} variant="h3" color={color}>
-            {user?.username || "Channel"}
+            {user?.name || "Channel"}
           </Typography>
-          <span className="block">@SageArtLive • {user.subscribers} subscribers • 149 videos</span>
-          <Button sx={{
+          <span className="block">@{user?.name} • {user?.subscribers} subscribers</span>
+          {/* <Button sx={{
             backgroundColor: "#dc2626",
             marginTop: "1rem",
             color: "white"
           }} className="block bg-red-600 text-white">
             Subscribe
-          </Button>
+          </Button> */}
         </Box>
       </Box>
     </div>

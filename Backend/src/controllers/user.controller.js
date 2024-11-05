@@ -253,13 +253,24 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req?.user, "User fetched successfully"));
 });
 
-const getUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req?.params?.id).select("-password -refreshToken")
-  if (!user) {
-    return new ApiError(404, "User Not Found")
+const getUser = asyncHandler(async (req, res, next) => {
+  const userId = req.params.id;
+
+  if (!userId) {
+    return next(new ApiError(400, "User ID is required"));
   }
-  return res.status(200).json(new ApiResponse(200, user, "User Find Successfully"));
-})
+
+  try {
+    const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) {
+      return next(new ApiError(404, "User Not Found"));
+    }
+
+    res.status(200).json(new ApiResponse(200, user, "User found successfully"));
+  } catch (err) {
+    next(err);
+  }
+});
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { email } = req.body;
@@ -481,20 +492,41 @@ const deleteUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, "User deleted successfully."));
 });
 
-const subscribe = asyncHandler(async (req, res) => {
-  console.log(req.params.id);
+const subscribe = asyncHandler(async (req, res, next) => {
+  console.log("Channel ID to subscribe:", req.params.id);
+
   try {
-    await User.findByIdAndUpdate(req.user.id, {
-      $push: { subscribedUsers: req.params.id },
+    const userId = req.user.id;
+    const channelId = req.params.id;
+
+    const user = await User.findById(userId);
+    console.log(user);
+    
+
+    if (user.subscribedUsers.includes(channelId)) {
+      throw new ApiError(400, "You are already subscribed to this channel.")
+    }
+
+
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { subscribedUsers: channelId },
     });
-    await User.findByIdAndUpdate(req.params.id, {
-      $inc: { subscribers: 1 },
-    });
-    res.status(200).json("Subscription successfull.")
+
+    const updatedChannelUser = await User.findByIdAndUpdate(
+      channelId,
+      { $inc: { subscribers: 1 } },
+      { new: true }
+    );
+
+    console.log("Updated Channel User:", updatedChannelUser);
+
+    res.status(200).json(new ApiResponse(200, null, "Subscription successful."));
   } catch (err) {
-    next(err);
+    next(err); 
   }
 });
+
+
 
 const unsubscribe = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(req.user.id, {
@@ -536,6 +568,18 @@ const dislike = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(201, null, "the video has been disliked"))
 });
 
+const getMyVideos = asyncHandler(async (req, res) => {
+  const userId = req.user.id
+
+  const videos = await Video.aggregate([
+    {
+      $match: { userId: userId }
+    }
+  ])
+
+  return res.status(200).json(new ApiResponse(201, videos, "Vid fetched"))
+})
+
 export {
   registerUser,
   loginUser,
@@ -554,4 +598,5 @@ export {
   unsubscribe,
   like,
   dislike,
+  getMyVideos
 };

@@ -7,7 +7,7 @@ const ProfileLayout = ({ darkMode, children }) => {
     <div>
       <Profile darkMode={darkMode} />
       <ProfileNavbar />
-      <div>{children}</div>
+      <div className="h-screen">{children}</div>
     </div>
   );
 };

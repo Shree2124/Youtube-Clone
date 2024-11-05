@@ -194,7 +194,7 @@ const Navbar = ({ darkMode }) => {
             {isDropdownOpen && (
               <Dropdown>
                 <DropdownItem onClick={() => handleOptionClick("Profile")}>
-                  <Link to={"/profile"}>
+                  <Link to={"/profile/home"}>
                   Profile
                   </Link>
                 </DropdownItem>

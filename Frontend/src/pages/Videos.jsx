@@ -11,6 +11,8 @@ import { format } from "timeago.js";
 import { useSelector } from "react-redux";
 import { Comments, Recommendations } from "../components/index.js";
 
+// Styled components (same as provided above)
+
 const Container = styled.div`
   display: flex;
   gap: 24px;
@@ -131,7 +133,7 @@ const CommentSection = styled.div`
   transition: max-height 0.3s ease;
   width: 100%;
   height: fit-content;
-  max-height: ${(props) => (props.expanded ? "100%" : "120px")}; 
+  max-height: ${(props) => (props.expanded ? "100%" : "120px")};
   overflow: hidden;
 
   @media (min-width: 768px) {
@@ -146,26 +148,38 @@ const VideoFrame = styled.video`
 `;
 
 const Videos = () => {
-  const user = useSelector((state) => state.auth?.user);
+  const { auth, user } = useSelector((state) => state?.user);
   const path = useLocation().pathname.split("/")[2];
   const [channel, setChannel] = useState({});
   const [video, setVideo] = useState({});
   const [commentsExpanded, setCommentsExpanded] = useState(false);
 
-  const toggleComments = () => {
-    setCommentsExpanded(!commentsExpanded);
+  const toggleComments = () => setCommentsExpanded(!commentsExpanded);
+
+  const handleSubscribe = async () => {
+    try {
+      if (!channel._id) return;
+      const res = await axios.patch(`/users/sub/${user._id}`);
+      console.log(res.data);
+    } catch (error) {
+      console.log("Subscription error:", error);
+    }
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const videoRes = await axios.get(`/video/find/${path}`);
-        setVideo(videoRes.data.data);
+        const videoData = videoRes.data.data;
+        setVideo(videoData);
 
-        const channelRes = await axios.get(`/users/find/${videoRes.data.data.userId}`);
-        setChannel(channelRes.data);
+        if (videoData?.userId) {
+          const channelRes = await axios.get(`/users/find/${videoData.userId}`);
+          setChannel(channelRes.data.data);
+          console.log(channel?.subscribedUsers )
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Fetch error:", err);
       }
     };
     fetchData();
@@ -179,10 +193,12 @@ const Videos = () => {
         </VideoWrapper>
         <Title>{video.title}</Title>
         <Details>
-          <Info>{video.views} views • {format(video.createdAt)}</Info>
+          <Info>
+            {video.views} views • {format(video.createdAt)}
+          </Info>
           <Buttons>
             <Button>
-              <ThumbUpOutlinedIcon /> {video.likes?.length}
+              <ThumbUpOutlinedIcon /> {video.likes?.length || 0}
             </Button>
             <Button>
               <ThumbDownOffAltOutlinedIcon /> Dislike
@@ -201,11 +217,11 @@ const Videos = () => {
             <Avatar src={channel?.avatar} />
             <ChannelDetail>
               <span>{channel.name}</span>
-              <span>{channel.subscribers} subscribers</span>
+              <span>{channel?.subscribedUsers?.length || 0} subscribers</span>
               <p>{video.desc}</p>
             </ChannelDetail>
           </ChannelInfo>
-          <SubscribeButton>Subscribe</SubscribeButton>
+          <SubscribeButton onClick={handleSubscribe}>Subscribe</SubscribeButton>
         </Channel>
         <Hr />
         <CommentSection expanded={commentsExpanded}>
