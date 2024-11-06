@@ -156,6 +156,24 @@ const Videos = () => {
 
   const toggleComments = () => setCommentsExpanded(!commentsExpanded);
 
+  const handleLike = async () => {
+    try {
+      const res = await axios.put(`/users/like/${video._id}`);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDislike = async () => {
+    try {
+      const res = await axios.put(`/users/dislike/${video._id}`);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleSubscribe = async () => {
     try {
       if (!channel._id) return;
@@ -167,6 +185,14 @@ const Videos = () => {
   };
 
   useEffect(() => {
+    const handleView = async () => {
+      try {
+        const res = await axios.put(`/video/view/${video._id}`);
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     const fetchData = async () => {
       try {
         const videoRes = await axios.get(`/video/find/${path}`);
@@ -176,13 +202,13 @@ const Videos = () => {
         if (videoData?.userId) {
           const channelRes = await axios.get(`/users/find/${videoData.userId}`);
           setChannel(channelRes.data.data);
-          console.log(channel?.subscribedUsers )
         }
       } catch (err) {
         console.error("Fetch error:", err);
       }
     };
     fetchData();
+    handleView();
   }, [path]);
 
   return (
@@ -197,11 +223,11 @@ const Videos = () => {
             {video.views} views • {format(video.createdAt)}
           </Info>
           <Buttons>
-            <Button>
+            <Button onClick={handleLike}>
               <ThumbUpOutlinedIcon /> {video.likes?.length || 0}
             </Button>
             <Button>
-              <ThumbDownOffAltOutlinedIcon /> Dislike
+              <ThumbDownOffAltOutlinedIcon onClick={handleDislike} /> Dislike
             </Button>
             <Button>
               <ReplyOutlinedIcon /> Share
