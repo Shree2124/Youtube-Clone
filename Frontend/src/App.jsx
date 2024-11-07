@@ -9,6 +9,7 @@ import MobileContextProvider from "./components/context/ContextProvider.jsx";
 import useAuth from "./hooks/useAuth.js";
 import ProfileHome from "./components/Profile/Home.jsx";
 import MyVideos from "./components/Profile/MyVideos.jsx";
+import Subs from "./components/Profile/Subs.jsx";
 
 const Container = styled.div`
   justify-content: space-between;
@@ -68,6 +69,10 @@ function App() {
                     <Route
                       path="/profile/home"
                       element={<ProfileHome darkMode={darkMode} />}
+                    ></Route>
+                    <Route
+                      path="/profile/subs"
+                      element={<Subs darkMode={darkMode} />}
                     ></Route>
                     <Route
                       path="/profile/my-videos"

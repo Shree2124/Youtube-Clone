@@ -177,7 +177,7 @@ const Videos = () => {
   const handleSubscribe = async () => {
     try {
       if (!channel._id) return;
-      const res = await axios.patch(`/users/sub/${user._id}`);
+      const res = await axios.patch(`/users/sub/${channel._id}`);
       console.log(res.data);
     } catch (error) {
       console.log("Subscription error:", error);
@@ -187,7 +187,7 @@ const Videos = () => {
   useEffect(() => {
     const handleView = async () => {
       try {
-        const res = await axios.put(`/video/view/${video._id}`);
+        const res = await axios.put(`/video/view/${video?._id}`);
         console.log(res);
       } catch (error) {
         console.log(error);

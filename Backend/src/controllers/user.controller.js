@@ -499,17 +499,16 @@ const subscribe = asyncHandler(async (req, res, next) => {
     const userId = req.user.id;
     const channelId = req.params.id;
 
-    const user = await User.findById(userId);
-    console.log(user);
-    
+    const channelUser = await User.findById(channelId);
 
-    if (user.subscribedUsers.includes(channelId)) {
+
+    if (channelUser.subscribedUsers.includes(channelId)) {
       throw new ApiError(400, "You are already subscribed to this channel.")
     }
 
 
-    await User.findByIdAndUpdate(userId, {
-      $addToSet: { subscribedUsers: channelId },
+    await User.findByIdAndUpdate(channelId, {
+      $addToSet: { subscribedUsers: userId },
     });
 
     const updatedChannelUser = await User.findByIdAndUpdate(
@@ -522,11 +521,9 @@ const subscribe = asyncHandler(async (req, res, next) => {
 
     res.status(200).json(new ApiResponse(200, null, "Subscription successful."));
   } catch (err) {
-    next(err); 
+    next(err);
   }
 });
-
-
 
 const unsubscribe = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(req.user.id, {
@@ -578,6 +575,25 @@ const getMyVideos = asyncHandler(async (req, res) => {
   ])
 
   return res.status(200).json(new ApiResponse(201, videos, "Vid fetched"))
+});
+
+const getSubs = asyncHandler(async (req, res) => {
+  const userId = req.user._id
+  console.log(req.user);
+  
+  // const subs = await User.aggregate([
+  //   {
+  //     $match: {
+  //       subscribedUsers: userId
+  //     }
+  //   }
+  // ])
+
+  const subscribedChannels = await User.find({
+    subscribedUsers: { $in: [userId] } 
+  }).select('name email avatar subscribers'); 
+
+  return res.status(200).json(new ApiResponse(201, subscribedChannels, "fetched Subscribed channels"))
 })
 
 export {
@@ -598,5 +614,6 @@ export {
   unsubscribe,
   like,
   dislike,
+  getSubs,
   getMyVideos
 };

@@ -105,9 +105,8 @@ const SignIn = () => {
       const res = await axios.post(
         "api/v1/users/register",
         { name, email, password },
-        { withCredentials: true }
       );
-      dispatch(login(res.data));
+      // dispatch(login(res.data));
       console.log(res.data);
       navigate("/");
     } catch (err) {

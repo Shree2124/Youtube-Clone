@@ -3,11 +3,10 @@ import styled from "styled-components";
 import ProfileLayout from "../Layouts/ProfileLayout";
 import axios from "../../api/axios";
 import { Link } from "react-router-dom";
+import Card from "../Card";
 
 const VideoGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  height: 100%;
   padding: 20px;
 `;
 
@@ -18,7 +17,7 @@ const VideoCard = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
   display: flex;
-  
+
   &:hover {
     transform: scale(1.05);
   }
@@ -72,14 +71,8 @@ const ProfileHome = ({ darkMode }) => {
     <ProfileLayout darkMode={darkMode}>
       <VideoGrid>
         {videos?.map((video) => (
-          <Link to={`/video/${video._id}`}>
-            <VideoCard key={video._id}>
-              <Thumbnail src={video.imgUrl} alt={video.title} />
-              <VideoInfo>
-                <h3>{video.title}</h3>
-                <p>{video.description}</p>
-              </VideoInfo>
-            </VideoCard>
+          <Link key={video._id} to={`/video/${video._id}`}>
+            <Card type={"sm"} video={video} />
           </Link>
         ))}
       </VideoGrid>

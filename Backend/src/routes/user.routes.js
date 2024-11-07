@@ -17,7 +17,8 @@ import {
   like,
   dislike,
   getUser,
-  getMyVideos
+  getMyVideos,
+  getSubs
 } from "../controllers/user.controller.js";
 // import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -63,6 +64,8 @@ router.route("/like/:videoId").put(verifyJWT, like)
 router.route("/dislike/:videoId").put(verifyJWT, dislike)
 
 router.route("/get-my-videos").get(verifyJWT, getMyVideos)
+
+router.route("/get-sub-channels").get(verifyJWT, getSubs)
 
 
 // router

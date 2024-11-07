@@ -50,6 +50,10 @@ const tabs = [
     name: "My Videos",
     path: "/profile/my-videos",
   },
+  {
+    name: "Subscribed Channels",
+    path: "/profile/subs"
+  }
 ];
 
 const ProfileNavbar = () => {
