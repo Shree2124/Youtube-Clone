@@ -23,14 +23,11 @@ app.use(
 
 // if data is comming as a json
 app.use(
-  express.json({
-    // Middleware
-    limit: "16kb",
-  })
+  express.json()
 );
 
 // if data is comming from URL
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.urlencoded({ extended: true}));
 
 // if pdf is come or some comming like public accests:-
 app.use(express.static("public"));
