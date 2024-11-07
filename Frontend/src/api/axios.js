@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../store/store.js";  
 import { setAuth, setUser, setLoading, setError, clearUser } from "../redux/slices/userSlice.js"
 
-const axiosInstance = axios.create({
+const axios = axios.create({
     baseURL: "https://youtube-clone-pi-peach.vercel.app/api/v1",
     withCredentials: true,
     headers: {
