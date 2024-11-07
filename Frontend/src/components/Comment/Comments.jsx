@@ -5,7 +5,7 @@ import { Avatar, Button } from "@mui/material";
 import { Comment } from "../index";
 import axiosInstance from "../../api/axios";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 
 const Container = styled.div`
   padding: 1rem;
