@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { TextField, Button, CircularProgress } from "@mui/material";
 import axiosInstance from "../../api/axios";
+import useAuth from "../../hooks/useAuth"; 
 
 const FormWrapper = styled.div`
   display: flex;
@@ -49,6 +50,7 @@ const SubmitButton = styled(Button)`
 `;
 
 const UploadVideo = () => {
+  const { user, loading: authLoading } = useAuth(); 
   const [formValues, setFormValues] = useState({
     title: "",
     description: "",
@@ -57,6 +59,16 @@ const UploadVideo = () => {
     thumbnail: null,
   });
   const [loading, setLoading] = useState(false);
+
+  if (authLoading) return <div>Loading user data...</div>;
+
+  if (!user) {
+    return (
+      <div>
+        <p>You need to be logged in to upload a video. Please log in.</p>
+      </div>
+    );
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -4,8 +4,8 @@ import ImgLogo from "../../Logo/logo-color.png";
 import { Avatar, Button } from "@mui/material";
 import { Comment } from "../index";
 import axiosInstance from "../../api/axios";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 const Container = styled.div`
   padding: 1rem;
@@ -59,24 +59,28 @@ const StyledButton = styled(Button)`
 
 const Comments = ({ videoId }) => {
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user?.auth);
+  const { user, loading } = useAuth();
 
   const [comments, setComments] = useState(null);
   const [comment, setComment] = useState("");
 
-  const fetch = async () => {
-    const res = await axiosInstance.get(`/comment/get-comments/${videoId}`);
-    setComments(res.data.data);
+  const fetchComments = async () => {
+    try {
+      const res = await axiosInstance.get(`/comment/get-comments/${videoId}`);
+      setComments(res.data.data);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
   };
 
   const handleComment = async () => {
-    if (user) {
+    if (auth) {
       try {
-        const res = await axiosInstance.post(`/comment/add-comment`, { desc: comment, videoId: videoId });
+        await axiosInstance.post(`/comment/add-comment`, { desc: comment, videoId });
         setComment("");
-        fetch();
+        fetchComments(); 
       } catch (error) {
-        console.error(error);
+        console.error("Error adding comment:", error);
       }
     } else {
       navigate("/signin");
@@ -84,8 +88,10 @@ const Comments = ({ videoId }) => {
   };
 
   useEffect(() => {
-    fetch();
+    fetchComments();
   }, [videoId]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Container>

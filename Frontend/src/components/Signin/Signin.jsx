@@ -1,16 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import { setUser } from "../../redux/slices/userSlice";
-// import { auth, provider } from "../firebase";
-// import { signInWithPopup } from "firebase/auth";
-// import { async } from "@firebase/util";
+import { setUser } from "../../redux/slices/userSlice";  // Assuming this sets user data in Redux
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../api/axios.js";
-// import axios from "../../api/axios.js";
-
-// const cookies = new Cookies();
-// const checkToken = cookies.get("checkToken");
+import axiosInstance from "../../api/axios.js";  // Your axios instance setup
 
 const Container = styled.div`
   display: flex;
@@ -88,11 +81,10 @@ const SignIn = () => {
     try {
       const res = await axiosInstance.post(
         "/users/login",
-        { name:name1, password:password1 },
+        { name: name1, password: password1 },
         { withCredentials: true }
       );
-      dispatch(setUser(res.data.user));
-      console.log(res.data);
+      dispatch(setUser(res.data.data)); 
       navigate("/");
     } catch (err) {
       console.log(err);
@@ -104,38 +96,14 @@ const SignIn = () => {
     try {
       const res = await axiosInstance.post(
         "/users/register",
-        { name, email, password },
+        { name, email, password }
       );
-      // dispatch(login(res.data));
-      console.log(res.data);
-      navigate("/");
+      console.log(res.data.data);
+      navigate("/"); 
     } catch (err) {
-      console.log(err);
+      console.log(err); 
     }
   };
-
-  //   const signInWithGoogle = async () => {
-  //     dispatch(loginStart());
-  //     signInWithPopup(auth, provider)
-  //       .then((result) => {
-  //         axios
-  //           .post("/auth/google", {
-  //             name: result.user.displayName,
-  //             email: result.user.email,
-  //             img: result.user.photoURL,
-  //           })
-  //           .then((res) => {
-  //             console.log(res);
-  //             dispatch(loginSuccess(res.data));
-  //             navigate("/");
-  //           });
-  //       })
-  //       .catch((error) => {
-  //         dispatch(loginFailure());
-  //       });
-  //   };
-
-  //TODO: REGISTER FUNCTIONALITY
 
   return (
     <Container>
@@ -152,7 +120,6 @@ const SignIn = () => {
           onChange={(e) => setPassword1(e.target.value)}
         />
         <Button onClick={handleLogin}>Sign in</Button>
-
 
         <Title>or</Title>
 

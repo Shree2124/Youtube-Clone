@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Avatar } from "@mui/material";
 import axiosInstance from "../../api/axios";
+import useAuth from "../../hooks/useAuth.js";
 
 const Container = styled.div`
   display: flex;
@@ -10,7 +11,7 @@ const Container = styled.div`
   padding: 1rem;
   height: 100%;
   margin-bottom: 1.25rem;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
@@ -34,7 +35,7 @@ const Name = styled.span`
   font-size: 0.81rem;
   font-weight: 500;
   color: ${({ theme }) => theme.text};
-  
+
   @media (max-width: 768px) {
     font-size: 0.75rem;
   }
@@ -65,14 +66,22 @@ const Text = styled.span`
 
 const Comment = ({ comment }) => {
   const [channel, setChannel] = useState({});
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const fetch = async () => {
-      const res = await axiosInstance.get(`/users/find/${comment.userId}`);
-      setChannel(res.data.data);
+    const fetchChannelData = async () => {
+      try {
+        const res = await axiosInstance.get(`/users/find/${comment.userId}`);
+        setChannel(res.data.data);
+      } catch (error) {
+        console.error("Error fetching channel data:", error);
+      }
     };
-    fetch();
-  }, [comment.userId]);
+
+    fetchChannelData();
+  }, [auth, comment.userId]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Container>
