@@ -13,12 +13,12 @@ app.use(
 );
 
 
-app.get("/",(req, res)=>{
-  const data = {
-    user: "hello"
-  }
-  res.send(data)
-})
+// app.get("/",(req, res)=>{
+//   const data = {
+//     user: "hello"
+//   }
+//   res.send(data)
+// })
 
 // ⁡⁢⁣⁢+⁡ configuration of data: -
 
