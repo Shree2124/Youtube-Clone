@@ -115,7 +115,7 @@ const Navbar = ({ darkMode }) => {
       navigate("/upload-video");
     } else if (option === "Logout") {
       try {
-        const res = await axiosInstance("/users/logout");
+        const res = await axiosInstance.post("/users/logout");
       } catch (error) {
         console.log(error);
       }
