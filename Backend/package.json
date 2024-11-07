@@ -4,8 +4,11 @@
   "description": "a backend at chai aur code",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules index.js"
   },
   "keywords": [
     "javascript",
