@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
             const refreshToken = getCookieToken('refreshToken');
 
             try {
-                const refreshResponse = await axios.post('/users/refresh-token', { refreshToken });
+                const refreshResponse = await axiosInstance.post('/users/refresh-token', { refreshToken });
                 document.cookie = `accessToken=${refreshResponse.data.accessToken}; path=/; secure; SameSite=Lax`;
                 originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
                 return axiosInstance(originalRequest);
