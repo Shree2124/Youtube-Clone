@@ -6,7 +6,7 @@ import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 import { Avatar } from "@mui/material";
 import axiosInstance from "../api/axios.js";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { format } from "timeago.js";
 import { useSelector } from "react-redux";
 import { Comments, Recommendations } from "../components/index.js";
@@ -146,6 +146,7 @@ const VideoFrame = styled.video`
 `;
 
 const Videos = () => {
+  const { id } = useParams();
   const { user } = useSelector((state) => state?.user);
   const path = useLocation().pathname.split("/")[2];
   const [channel, setChannel] = useState({});
@@ -156,7 +157,7 @@ const Videos = () => {
 
   const handleLike = async () => {
     try {
-      const res = await axiosInstance.put(`/users/like/${video._id}`);
+      const res = await axiosInstance.put(`/users/like/${id}`);
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -165,7 +166,7 @@ const Videos = () => {
 
   const handleDislike = async () => {
     try {
-      const res = await axiosInstance.put(`/users/dislike/${video._id}`);
+      const res = await axiosInstance.put(`/users/dislike/${id}`);
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -185,7 +186,9 @@ const Videos = () => {
   useEffect(() => {
     const handleView = async () => {
       try {
-        const res = await axiosInstance.put(`/video/view/${video?._id}`);
+        console.log(id);
+        
+        const res = await axiosInstance.put(`/video/view/${id}`);
         console.log(res);
       } catch (error) {
         console.log(error);
@@ -198,7 +201,9 @@ const Videos = () => {
         setVideo(videoData);
 
         if (videoData?.userId) {
-          const channelRes = await axiosInstance.get(`/users/find/${videoData.userId}`);
+          const channelRes = await axiosInstance.get(
+            `/users/find/${videoData.userId}`
+          );
           setChannel(channelRes.data.data);
         }
       } catch (err) {

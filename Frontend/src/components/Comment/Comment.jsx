@@ -79,7 +79,7 @@ const Comment = ({ comment }) => {
     };
 
     fetchChannelData();
-  }, [auth, comment.userId]);
+  }, [ comment.userId]);
 
   if (loading) return <div>Loading...</div>;
 

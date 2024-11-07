@@ -116,6 +116,9 @@ const Navbar = ({ darkMode }) => {
     } else if (option === "Logout") {
       try {
         const res = await axiosInstance.post("/users/logout");
+        if(res.status === 200){
+          window.location.reload()
+        }
       } catch (error) {
         console.log(error);
       }

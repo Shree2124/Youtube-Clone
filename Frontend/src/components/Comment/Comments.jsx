@@ -6,6 +6,7 @@ import { Comment } from "../index";
 import axiosInstance from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
   padding: 1rem;
@@ -59,7 +60,9 @@ const StyledButton = styled(Button)`
 
 const Comments = ({ videoId }) => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user } = useSelector((state) => state?.user);
+  console.log(user);
+  
 
   const [comments, setComments] = useState(null);
   const [comment, setComment] = useState("");
@@ -74,30 +77,31 @@ const Comments = ({ videoId }) => {
   };
 
   const handleComment = async () => {
-    if (auth) {
+    
+    
       try {
-        await axiosInstance.post(`/comment/add-comment`, { desc: comment, videoId });
+        const res = await axiosInstance.post(`/comment/add-comment`, { desc: comment, videoId });
+        console.log(res.data);
+        
         setComment("");
         fetchComments(); 
       } catch (error) {
         console.error("Error adding comment:", error);
       }
-    } else {
-      navigate("/signin");
-    }
+    
   };
 
   useEffect(() => {
     fetchComments();
   }, [videoId]);
 
-  if (loading) return <div>Loading...</div>;
+  if (!user) return <div>Loading...</div>;
 
   return (
     <Container>
       <NewComment>
         <Avatar
-          src={ImgLogo}
+          src={user?.avatar}
           sx={{
             height: "3.12rem",
             width: "3.12rem",

@@ -9,16 +9,7 @@ const useAuth = () => {
 
   useLayoutEffect(() => {
     if (!user) dispatch(fetchUser());
-  }, [dispatch, user]);
-
-  console.log(user);
-
-
-  // useEffect(() => {
-  //   if (!loading && !user) {
-  //     navigate('/login');
-  //   }
-  // }, [loading, user, navigate]);
+  }, []);
 
   return { user, loading };
 };

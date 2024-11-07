@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import { setUser } from "../../redux/slices/userSlice";  // Assuming this sets user data in Redux
+import { setUser } from "../../redux/slices/userSlice"; // Assuming this sets user data in Redux
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../api/axios.js";  // Your axios instance setup
+import axiosInstance from "../../api/axios.js"; // Your axios instance setup
 
 const Container = styled.div`
   display: flex;
@@ -84,8 +84,11 @@ const SignIn = () => {
         { name: name1, password: password1 },
         { withCredentials: true }
       );
-      dispatch(setUser(res.data.data)); 
-      navigate("/");
+      dispatch(setUser(res.data.data));
+      if (res.status === 200) {
+        window.location.reload();
+        navigate("/");
+      }
     } catch (err) {
       console.log(err);
     }
@@ -94,14 +97,15 @@ const SignIn = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post(
-        "/users/register",
-        { name, email, password }
-      );
+      const res = await axiosInstance.post("/users/register", {
+        name,
+        email,
+        password,
+      });
       console.log(res.data.data);
-      navigate("/"); 
+      navigate("/");
     } catch (err) {
-      console.log(err); 
+      console.log(err);
     }
   };
 

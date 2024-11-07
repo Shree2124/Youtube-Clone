@@ -40,8 +40,10 @@ export const fetchUser = () => async (dispatch) => {
     dispatch(setLoading());
     try {
         const response = await axiosInstance.get('/users/current-user');
+        console.log(response.data);
         dispatch(setUser(response.data.data));
         dispatch(setAuth(true));
+        dispatch(setLoading(false))
     } catch (error) {
         console.error('Error fetching user:', error);
         dispatch(setError(error.message));
