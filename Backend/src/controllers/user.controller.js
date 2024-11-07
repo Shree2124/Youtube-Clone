@@ -134,7 +134,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "Strict",
+    sameSite: "Lax",
   };
 
   return res
@@ -159,7 +159,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $unset: {
-        refreshToken: 1, // this removes the field from document
+        refreshToken: 1,
       },
     },
     {
@@ -169,7 +169,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: true, 
+    sameSite: 'Lax',
   };
 
   return res
@@ -206,6 +207,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const options = {
       httpOnly: true,
       secure: true,
+      sameSite: 'Lax',
     };
 
     const {
@@ -580,7 +582,7 @@ const getMyVideos = asyncHandler(async (req, res) => {
 const getSubs = asyncHandler(async (req, res) => {
   const userId = req.user._id
   console.log(req.user);
-  
+
   // const subs = await User.aggregate([
   //   {
   //     $match: {
@@ -590,8 +592,8 @@ const getSubs = asyncHandler(async (req, res) => {
   // ])
 
   const subscribedChannels = await User.find({
-    subscribedUsers: { $in: [userId] } 
-  }).select('name email avatar subscribers'); 
+    subscribedUsers: { $in: [userId] }
+  }).select('name email avatar subscribers');
 
   return res.status(200).json(new ApiResponse(201, subscribedChannels, "fetched Subscribed channels"))
 })
