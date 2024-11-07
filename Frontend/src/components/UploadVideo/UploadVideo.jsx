@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { TextField, Button, CircularProgress } from "@mui/material";
 import axiosInstance from "../../api/axios";
 import useAuth from "../../hooks/useAuth"; 
+import { useSelector } from "react-redux";
 
 const FormWrapper = styled.div`
   display: flex;
@@ -50,7 +51,7 @@ const SubmitButton = styled(Button)`
 `;
 
 const UploadVideo = () => {
-  const { user, loading: authLoading } = useAuth(); 
+  const { user } = useSelector((state) => state?.user);
   const [formValues, setFormValues] = useState({
     title: "",
     description: "",
@@ -60,7 +61,7 @@ const UploadVideo = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  if (authLoading) return <div>Loading user data...</div>;
+  if (!user) return <div>Loading user data...</div>;
 
   if (!user) {
     return (
@@ -139,8 +140,10 @@ const UploadVideo = () => {
           onChange={handleInputChange}
           fullWidth
         />
+        <div className="flex flex-col">
         <label className="text-white pt-4">Video</label>
         <VideoInput type="file" accept="video/*" onChange={handleVideoChange} />
+        </div>
         <label className="text-white pt-4">Thumbnail</label>
         <VideoInput type="file" accept="image/*" onChange={handleThumbnailChange} />
         <SubmitButton
