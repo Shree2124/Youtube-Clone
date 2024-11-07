@@ -146,7 +146,7 @@ const VideoFrame = styled.video`
 `;
 
 const Videos = () => {
-  const { auth, user } = useSelector((state) => state?.user);
+  const { user } = useSelector((state) => state?.user);
   const path = useLocation().pathname.split("/")[2];
   const [channel, setChannel] = useState({});
   const [video, setVideo] = useState({});

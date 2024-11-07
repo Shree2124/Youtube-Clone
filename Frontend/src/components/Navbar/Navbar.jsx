@@ -8,6 +8,8 @@ import MobileContext from "../context/MobileContext.js";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ImgLogo from "../../Logo/logo-color.png";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axios.js";
 
 const Container = styled.div`
   position: fixed;
@@ -102,12 +104,24 @@ const Navbar = ({ darkMode }) => {
   const { auth, user } = useSelector((state) => state?.user);
   const { isMobile, setIsMobile } = useContext(MobileContext);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleToggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
   };
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = async (option) => {
+    if (option === "Upload Video") {
+      navigate("/upload-video");
+    } else if (option === "Logout") {
+      try {
+        const res = await axiosInstance("/users/logout");
+      } catch (error) {
+        console.log(error);
+      }
+    } else if (option === "Profile") {
+      navigate("/profile/home");
+    }
     console.log(option);
     setDropdownOpen(false);
   };
@@ -185,29 +199,24 @@ const Navbar = ({ darkMode }) => {
               />
               <Typography sx={{ ml: 1 }}>{user?.name || "User"}</Typography>
               <IconButton onClick={handleToggleDropdown}>
-                <ArrowDropDown sx={{
-                  color,
-                }} />
+                <ArrowDropDown
+                  sx={{
+                    color,
+                  }}
+                />
               </IconButton>
             </Box>
 
             {isDropdownOpen && (
               <Dropdown>
                 <DropdownItem onClick={() => handleOptionClick("Profile")}>
-                  <Link to={"/profile/home"}>
                   Profile
-                  </Link>
                 </DropdownItem>
                 <DropdownItem onClick={() => handleOptionClick("Logout")}>
-                  <span>
-
-                  Logout
-                  </span>
+                  <span>Logout</span>
                 </DropdownItem>
                 <DropdownItem onClick={() => handleOptionClick("Upload Video")}>
-                  <Link to={"/upload-video"}>
-                  Upload Video
-                  </Link>
+                  <Link to={"/upload-video"}>Upload Video</Link>
                 </DropdownItem>
               </Dropdown>
             )}
