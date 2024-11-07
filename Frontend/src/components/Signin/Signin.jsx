@@ -6,7 +6,7 @@ import { setUser } from "../../redux/slices/userSlice";
 // import { signInWithPopup } from "firebase/auth";
 // import { async } from "@firebase/util";
 import { useNavigate } from "react-router-dom";
-import axios from "../../api/axios";
+import axios from "../../api/axios.js";
 // import axios from "../../api/axios.js";
 
 // const cookies = new Cookies();

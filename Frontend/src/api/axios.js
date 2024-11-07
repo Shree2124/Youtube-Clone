@@ -14,7 +14,7 @@ const getCookieToken = (tokenName) => {
     return token ? token.split('=')[1] : null;
 };
 
-axiosInstance.interceptors.request.use(
+axios.interceptors.request.use(
     (config) => {
         const accessToken = getCookieToken('accessToken');
         if (accessToken) {
@@ -25,7 +25,7 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-axiosInstance.interceptors.response.use(
+axios.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
@@ -49,4 +49,4 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-export default axiosInstance;
+export default axios;
