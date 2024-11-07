@@ -1,8 +1,7 @@
 import axios from "axios";
-import { store } from "../store";  // Import the Redux store
-import { setAuth, setUser, setLoading, setError, clearUser } from "../slices/authSlice";
+import { store } from "../store/store.js";  
+import { setAuth, setUser, setLoading, setError, clearUser } from "../redux/slices/userSlice.js"
 
-// Create the Axios instance
 const axiosInstance = axios.create({
     baseURL: "https://youtube-clone-pi-peach.vercel.app/api/v1",
     withCredentials: true,
@@ -10,14 +9,11 @@ const axiosInstance = axios.create({
         'Content-Type': 'application/json',
     },
 });
-
-// Utility function to get a token from cookies
 const getCookieToken = (tokenName) => {
     const token = document.cookie.split('; ').find(row => row.startsWith(`${tokenName}=`));
     return token ? token.split('=')[1] : null;
 };
 
-// Request interceptor to add Authorization header
 axiosInstance.interceptors.request.use(
     (config) => {
         const accessToken = getCookieToken('accessToken');
@@ -29,17 +25,14 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token expiration
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
-        
-        // Check if error status is 401 and retry logic isn't already applied
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             const refreshToken = getCookieToken('refreshToken');
-            
+
             try {
                 const refreshResponse = await axios.post('/users/refresh-token', { refreshToken });
                 document.cookie = `accessToken=${refreshResponse.data.accessToken}; path=/; secure; SameSite=Lax`;
@@ -51,7 +44,7 @@ axiosInstance.interceptors.response.use(
                 return Promise.reject(refreshError);
             }
         }
-        
+
         return Promise.reject(error);
     }
 );
