@@ -87,7 +87,7 @@ const SignIn = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "api/v1/users/login",
+        "/users/login",
         { name:name1, password:password1 },
         { withCredentials: true }
       );
@@ -103,7 +103,7 @@ const SignIn = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "api/v1/users/register",
+        "/users/register",
         { name, email, password },
       );
       // dispatch(login(res.data));
