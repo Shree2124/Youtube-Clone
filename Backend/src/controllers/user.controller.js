@@ -7,6 +7,16 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
+
+const options = {
+  httpOnly: true,           
+  secure: true,              
+  sameSite: 'None',          
+  path: '/',                 
+  maxAge: 15 * 60 * 1000
+};
+
+
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -131,12 +141,6 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "Lax",
-  };
-
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
@@ -167,11 +171,6 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true, 
-    sameSite: 'Lax',
-  };
 
   return res
     .status(200)
@@ -204,11 +203,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh token is expired or used");
     }
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'Lax',
-    };
+
 
     const {
       accessToken,

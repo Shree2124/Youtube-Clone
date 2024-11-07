@@ -29,10 +29,10 @@ axiosInstance.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             const refreshToken = getCookieToken('refreshToken');
-
+            console.log(refreshToken);
             try {
                 const refreshResponse = await axiosInstance.post('/users/refresh-token', { refreshToken });
-                document.cookie = `accessToken=${refreshResponse.data.accessToken}; path=/; secure; SameSite=Lax`;
+                document.cookie = `accessToken=${refreshResponse.data.accessToken}; path=/; secure; SameSite=None`;
                 originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
