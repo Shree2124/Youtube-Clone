@@ -6,7 +6,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173",process.env.CORS_ORIGIN, "*"],
+    origin: ["http://localhost:5173", process.env.CORS_ORIGIN, "*"],
     credentials: true,
   })
 );
@@ -22,12 +22,12 @@ app.use(
 // ⁡⁢⁣⁢+⁡ configuration of data: -
 
 // if data is comming as a json
-  app.use(
-    express.json({
-      // Middleware
-      limit: "16kb",
-    })
-  );
+app.use(
+  express.json({
+    // Middleware
+    limit: "16kb",
+  })
+);
 
 // if data is comming from URL
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
