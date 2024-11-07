@@ -8,7 +8,9 @@ const axiosInstance = axios.create({
 });
 const getCookieToken = (tokenName) => {
     const token = document.cookie.split('; ').find(row => row.startsWith(`${tokenName}=`));
+    console.log(tokenName,token);
     return token ? token.split('=')[1] : null;
+
 };
 
 axiosInstance.interceptors.request.use(
