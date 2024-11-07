@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import ProfileLayout from "../Layouts/ProfileLayout";
-import axios from "../../api/axios";
+import axiosInstance from "../../api/axios";
 import { Link } from "react-router-dom";
 import Card from "../Card";
 
@@ -50,7 +50,7 @@ const MyVideo = ({ darkMode }) => {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/users/get-my-videos");
+      const res = await axiosInstance.get("/users/get-my-videos");
       console.log(res.data.data);
       setVideos(res.data.data);
       setLoading(false);

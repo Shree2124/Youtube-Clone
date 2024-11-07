@@ -4,7 +4,7 @@ import logo from "../Logo/logo-color.png";
 import { Link } from "react-router-dom";
 import { format } from "timeago.js";
 import { LogoDev } from "@mui/icons-material";
-import axios from "../api/axios";
+import axiosInstance from "../api/axios";
 
 const Container = styled.div`
   width: ${(props) => (props.type === "sm" ? "max-content" : "25rem")};
@@ -105,7 +105,7 @@ const Card = ({ type, video }) => {
     console.log(video._id);
     const fetch = async () => {
       try {
-        await axios.get(`/users/find/${video?.userId}`).then((res) => {
+        await axiosInstance.get(`/users/find/${video?.userId}`).then((res) => {
           console.log(res);
           setChannel(res.data.data);
         });

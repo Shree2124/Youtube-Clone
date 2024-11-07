@@ -3,7 +3,7 @@ import styled from "styled-components";
 import ImgLogo from "../../Logo/logo-color.png";
 import { Avatar, Button } from "@mui/material";
 import { Comment } from "../index";
-import axios from "../../api/axios";
+import axiosInstance from "../../api/axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -65,14 +65,14 @@ const Comments = ({ videoId }) => {
   const [comment, setComment] = useState("");
 
   const fetch = async () => {
-    const res = await axios.get(`/comment/get-comments/${videoId}`);
+    const res = await axiosInstance.get(`/comment/get-comments/${videoId}`);
     setComments(res.data.data);
   };
 
   const handleComment = async () => {
     if (user) {
       try {
-        const res = await axios.post(`/comment/add-comment`, { desc: comment, videoId: videoId });
+        const res = await axiosInstance.post(`/comment/add-comment`, { desc: comment, videoId: videoId });
         setComment("");
         fetch();
       } catch (error) {

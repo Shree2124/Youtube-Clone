@@ -48,7 +48,7 @@ export const fetchUser = () => async (dispatch) => {
     try {
         // console.log(getCookieToken('accessToken'));
         
-        const response = await axios.get('/users/current-user', {
+        const response = await axiosInstance.get('/users/current-user', {
             headers: {
                 Authorization: `Bearer ${getCookieToken('accessToken')}`,
             },
@@ -64,7 +64,7 @@ export const fetchUser = () => async (dispatch) => {
         if (error.response?.status === 401) {
             try {
                 const refreshToken = getCookieToken('refreshToken');
-                const refreshResponse = await axios.post('/users/refresh-token', {
+                const refreshResponse = await axiosInstance.post('/users/refresh-token', {
                     refreshToken,
                 });
                 document.cookie = `accessToken=${refreshResponse.data.accessToken}; path=/; secure; SameSite=Lax`;

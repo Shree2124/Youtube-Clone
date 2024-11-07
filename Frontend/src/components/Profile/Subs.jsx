@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import ProfileLayout from "../Layouts/ProfileLayout";
 import SubscribeCard from "./SubscribeCard";
-import axios from "../../api/axios";
+import axiosInstance from "../../api/axios";
 
 const Subs = ({ darkMode }) => {
   const [subs, setSubs] = useState([])
     const fetchSubs = async()=>{
         try {
-            const res = await axios.get(`/users/get-sub-channels`)
+            const res = await axiosInstance.get(`/users/get-sub-channels`)
             console.log(res.data);
 
             setSubs(res.data.data)

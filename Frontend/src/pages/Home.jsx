@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Card } from "../components";
-import axios from "../api/axios";
+import axiosInstance from "../api/axios";
 import useAuth from "../hooks/useAuth";
 import { fetchUser } from "../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,7 +53,7 @@ const Home = ({ type = "random" }) => {
 
   useEffect(() => {
     const fetchVideos = async () => {
-      res = await axios.get(`/video/${type}`);
+      res = await axiosInstance.get(`/video/${type}`);
       console.log(res.data.data);
 
       setVideo(res?.data?.data);

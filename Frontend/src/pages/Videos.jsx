@@ -5,13 +5,11 @@ import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutl
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 import { Avatar } from "@mui/material";
-import axios from "../api/axios.js";
+import axiosInstance from "../api/axios.js";
 import { useLocation } from "react-router-dom";
 import { format } from "timeago.js";
 import { useSelector } from "react-redux";
 import { Comments, Recommendations } from "../components/index.js";
-
-// Styled components (same as provided above)
 
 const Container = styled.div`
   display: flex;
@@ -158,7 +156,7 @@ const Videos = () => {
 
   const handleLike = async () => {
     try {
-      const res = await axios.put(`/users/like/${video._id}`);
+      const res = await axiosInstance.put(`/users/like/${video._id}`);
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -167,7 +165,7 @@ const Videos = () => {
 
   const handleDislike = async () => {
     try {
-      const res = await axios.put(`/users/dislike/${video._id}`);
+      const res = await axiosInstance.put(`/users/dislike/${video._id}`);
       console.log(res);
     } catch (error) {
       console.log(error);
@@ -177,7 +175,7 @@ const Videos = () => {
   const handleSubscribe = async () => {
     try {
       if (!channel._id) return;
-      const res = await axios.patch(`/users/sub/${channel._id}`);
+      const res = await axiosInstance.patch(`/users/sub/${channel._id}`);
       console.log(res.data);
     } catch (error) {
       console.log("Subscription error:", error);
@@ -187,7 +185,7 @@ const Videos = () => {
   useEffect(() => {
     const handleView = async () => {
       try {
-        const res = await axios.put(`/video/view/${video?._id}`);
+        const res = await axiosInstance.put(`/video/view/${video?._id}`);
         console.log(res);
       } catch (error) {
         console.log(error);
@@ -195,12 +193,12 @@ const Videos = () => {
     };
     const fetchData = async () => {
       try {
-        const videoRes = await axios.get(`/video/find/${path}`);
+        const videoRes = await axiosInstance.get(`/video/find/${path}`);
         const videoData = videoRes.data.data;
         setVideo(videoData);
 
         if (videoData?.userId) {
-          const channelRes = await axios.get(`/users/find/${videoData.userId}`);
+          const channelRes = await axiosInstance.get(`/users/find/${videoData.userId}`);
           setChannel(channelRes.data.data);
         }
       } catch (err) {

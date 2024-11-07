@@ -6,7 +6,7 @@ import { setUser } from "../../redux/slices/userSlice";
 // import { signInWithPopup } from "firebase/auth";
 // import { async } from "@firebase/util";
 import { useNavigate } from "react-router-dom";
-import axios from "../../api/axios.js";
+import axiosInstance from "../../api/axios.js";
 // import axios from "../../api/axios.js";
 
 // const cookies = new Cookies();
@@ -102,7 +102,7 @@ const SignIn = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         "/users/register",
         { name, email, password },
       );

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { TextField, Button, CircularProgress } from "@mui/material";
-import axios from "../../api/axios";
+import axiosInstance from "../../api/axios";
 
 const FormWrapper = styled.div`
   display: flex;
@@ -83,7 +83,7 @@ const UploadVideo = () => {
     formData.append("imgUrl", formValues.thumbnail);
 
     try {
-      const response = await axios.post("/video/add-video", formData, {
+      const response = await axiosInstance.post("/video/add-video", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

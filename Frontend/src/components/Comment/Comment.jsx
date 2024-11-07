@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Avatar } from "@mui/material";
-import axios from "../../api/axios";
+import axiosInstance from "../../api/axios";
 
 const Container = styled.div`
   display: flex;
@@ -68,7 +68,7 @@ const Comment = ({ comment }) => {
 
   useEffect(() => {
     const fetch = async () => {
-      const res = await axios.get(`/users/find/${comment.userId}`);
+      const res = await axiosInstance.get(`/users/find/${comment.userId}`);
       setChannel(res.data.data);
     };
     fetch();
