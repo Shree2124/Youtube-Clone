@@ -62,7 +62,6 @@ const Comments = ({ videoId }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state?.user);
   console.log(user);
-  
 
   const [comments, setComments] = useState(null);
   const [comment, setComment] = useState("");
@@ -77,18 +76,22 @@ const Comments = ({ videoId }) => {
   };
 
   const handleComment = async () => {
-    
-    
-      try {
-        const res = await axiosInstance.post(`/comment/add-comment`, { desc: comment, videoId });
+    try {
+      if (user) {
+        const res = await axiosInstance.post(`/comment/add-comment`, {
+          desc: comment,
+          videoId,
+        });
         console.log(res.data);
-        
+
         setComment("");
-        fetchComments(); 
-      } catch (error) {
-        console.error("Error adding comment:", error);
+        fetchComments();
+      } else {
+        navigate("/signin")
       }
-    
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
   };
 
   useEffect(() => {

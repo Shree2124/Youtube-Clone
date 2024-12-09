@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { TextField, Button, CircularProgress } from "@mui/material";
 import axiosInstance from "../../api/axios";
-import useAuth from "../../hooks/useAuth"; 
 import { useSelector } from "react-redux";
 
 const FormWrapper = styled.div`
