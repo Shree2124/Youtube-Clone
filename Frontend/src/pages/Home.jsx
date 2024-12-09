@@ -2,15 +2,14 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Card } from "../components";
 import axiosInstance from "../api/axios";
-import useAuth from "../hooks/useAuth";
-import { fetchUser } from "../redux/slices/userSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { CircularProgress } from "@mui/material";
 
 const Container = styled.div`
   min-height: 100vh;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  align-items: center;
   width: 100%;
   @media (width: 540px) {
     justify-content: space-between;
@@ -21,65 +20,44 @@ const Container = styled.div`
   }
 `;
 
+const LoaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh; 
+`;
+
 const Home = ({ type = "random" }) => {
-  // const {user, loading} = useAuth()
   const [video, setVideo] = useState(null);
-  const [loading2, setLoading2] = useState(false);
-  const dispatch = useDispatch();
-
-  // const auth = useSelector((state) => state?.auth?.auth);
-  // const fetchVideo = async () => {
-  //   try {
-  //     setLoading(true);
-  //     await axios
-  //       .get(`/api/v1/video/${type}`)
-  //       .then((res) => {
-  //         console.log(res);
-  //         setLoading(false);
-  //         setVideo(res?.data?.data);
-  //         console.log(video);
-  //       })
-  //       .catch((err) => {
-  //         console.log(err);
-  //         setLoading(false);
-  //       })
-  //       .finally(() => setLoading(false));
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  let res;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchVideos = async () => {
-      res = await axiosInstance.get(`/video/${type}`);
-      console.log(res.data.data);
-
-      setVideo(res?.data?.data);
-      console.log(video);
-      
+      setLoading(true);
+      try {
+        const res = await axiosInstance.get(`/video/${type}`);
+        setVideo(res?.data?.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchVideos();
   }, [type]);
 
   return (
     <Container>
-      {loading2 ? (
-        <p>Loading</p>
+      {loading ? (
+        <LoaderWrapper>
+          <CircularProgress />
+        </LoaderWrapper>
+      ) : video?.length > 0 ? (
+        video.map((i) => <Card key={i?._id} video={i} />)
       ) : (
-        video?.length > 0 ? (
-          video.map((i) => <Card key={i?._id} video={i} />)
-        ) : (
-          <p>Video not available</p>
-        )
+        <p>Video not available</p>
       )}
-      {/* <Card/>
-      <Card/>
-      <Card/>
-      <Card/>
-      <Card/>
-      <Card/> */}
     </Container>
   );
 };
