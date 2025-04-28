@@ -6,9 +6,10 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js"
 import fs from "fs"
+import path from "path";
 
-const tempDir = "./public/temp";
-const chunksDir = "./public/chunks";
+const tempDir = `../../public/temp`;
+const chunksDir = "../../public/chunks";
 
 // Ensure directories exist
 if (!fs.existsSync(tempDir)) {
