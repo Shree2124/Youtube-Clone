@@ -163,44 +163,48 @@ const search = asyncHandler(async (req, res) => {
   const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   
   try {
-    // Search in both title and tags using aggregation
+    // Search in both title, description and tags using aggregation
     const videos = await Video.aggregate([
       {
         $match: {
           $or: [
             { title: { $regex: sanitizedQuery, $options: "i" } },
-            { tags: { $regex: sanitizedQuery, $options: "i" } },
-            { description: { $regex: sanitizedQuery, $options: "i" } }
-          ],
-          isPublished: true // Only return published videos
+            { tags: { $in: [new RegExp(sanitizedQuery, "i")] } },
+            { des: { $regex: sanitizedQuery, $options: "i" } }
+          ]
         }
       },
-      // Add additional fields like view count, etc.
+      // Add user details lookup
       {
         $lookup: {
           from: "users",
-          localField: "owner",
+          localField: "userId",
           foreignField: "_id",
-          as: "ownerDetails"
+          as: "userDetails"
         }
       },
       {
-        $unwind: "$ownerDetails"
+        $unwind: {
+          path: "$userDetails",
+          preserveNullAndEmptyArrays: true
+        }
       },
       // Project only needed fields
       {
         $project: {
           _id: 1,
           title: 1,
-          description: 1,
-          thumbnail: 1,
-          videoFile: 1,
-          duration: 1,
+          des: 1,
+          imgUrl: 1,
+          videoUrl: 1,
           views: 1,
+          tags: 1,
+          likes: { $size: "$likes" },
+          dislikes: { $size: "$dislikes" },
           createdAt: 1,
-          "ownerDetails.name": 1,
-          "ownerDetails.username": 1,
-          "ownerDetails.avatar": 1
+          "userDetails.name": 1,
+          "userDetails.avatar": 1,
+          "userDetails.subscribers": 1
         }
       },
       // Sort by most relevant and popular
@@ -216,11 +220,31 @@ const search = asyncHandler(async (req, res) => {
       }
     ]);
     
+    // Format the response to match expected structure
+    const formattedVideos = videos.map(video => ({
+      _id: video._id,
+      title: video.title,
+      description: video.des,
+      thumbnail: video.imgUrl,
+      videoFile: video.videoUrl,
+      views: video.views,
+      likes: video.likes,
+      dislikes: video.dislikes,
+      tags: video.tags,
+      createdAt: video.createdAt,
+      owner: video.userDetails ? {
+        _id: video.userDetails._id,
+        name: video.userDetails.name,
+        avatar: video.userDetails.avatar,
+        subscribers: video.userDetails.subscribers
+      } : null
+    }));
+    
     // Return the results
     return res.status(200).json(new ApiResponse(
       200, 
-      videos,
-      `Found ${videos.length} results for "${query}"`
+      formattedVideos,
+      `Found ${formattedVideos.length} results for "${query}"`
     ));
   } catch (error) {
     // Log the error for server-side debugging
