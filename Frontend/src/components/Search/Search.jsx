@@ -12,6 +12,8 @@ const Search = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fadeIn, setFadeIn] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+  const [message, setMessage] = useState("");
   
   // Get search query from URL
   const location = useLocation();
@@ -23,6 +25,7 @@ const Search = () => {
     setVideos([]);
     setLoading(true);
     setFadeIn(false);
+    setMessage("");
     
     // Add small delay before fetching to allow for animation reset
     setTimeout(() => {
@@ -44,9 +47,15 @@ const Search = () => {
         params: { q: query }
       });
       
-      const searchResults = res?.data?.data || [];
-      setVideos(searchResults);
-      setError(null);
+      // Update to match the exact response structure from the API
+      if (res?.data?.success) {
+        setVideos(res.data.data || []);
+        setTotalResults(res.data.data.length);
+        setMessage(res.data.message || "");
+        setError(null);
+      } else {
+        throw new Error("Invalid response from server");
+      }
     } catch (error) {
       console.error("Error fetching search results:", error);
       setError("Failed to load search results. Please try again.");
@@ -65,7 +74,9 @@ const Search = () => {
         </div>
         
         <div className="mt-2 md:mt-0 text-gray-500 text-sm">
-          {!loading && videos.length > 0 ? `${videos.length} results found` : ''}
+          {!loading && videos.length > 0 ? (
+            message || `${totalResults} ${totalResults === 1 ? 'result' : 'results'} found`
+          ) : ''}
         </div>
       </div>
 

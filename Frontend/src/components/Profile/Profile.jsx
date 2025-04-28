@@ -1,60 +1,35 @@
-import { Avatar, Box, Button, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
-const Profile = ({ darkMode }) => {
-  const {user} = useSelector((state) => state?.user);
-  // console.log(user); 
-  
-  const [color, setColor] = useState("white");
-
-  useEffect(() => {
-    setColor(darkMode ? "white" : "black");
-  }, [darkMode]);
+const Profile = () => {
+  const { user } = useSelector((state) => state?.user);
 
   return (
     <div>
-      <Box
-        sx={{
-          padding: "0px",
-          backgroundColor: "#2de3e3",
-          height: "30vh",
-        }}
-        className="rounded-3xl"
-      ></Box>
-      <Box
-        sx={{
-          marginTop: "1rem",
-          display: "flex",
-          color: { color },
-          gap: "3rem",
-        }}
-      >
+      {/* Banner Image */}
+      <div className="bg-cyan-400 rounded-3xl w-full h-[30vh]"></div>
+      
+      {/* Profile Info Section */}
+      <div className="flex items-start gap-6 md:gap-12 mt-4">
+        {/* Avatar */}
         <div className="p-3">
-          <Avatar
-            sx={{
-              height: "10rem",
-              width: "10rem",
-            }}
-            src={
-              user?.avatar || "https://www.w3schools.com/howto/img_avatar.png"
-            }
+          <img
+            className="border-4 border-white dark:border-gray-800 rounded-full w-32 md:w-40 h-32 md:h-40 object-cover"
+            src={user?.avatar || "https://www.w3schools.com/howto/img_avatar.png"}
+            alt={`${user?.name || "User"}'s profile`}
           />
         </div>
-        <Box>
-          <Typography sx={{}} variant="h3" color={color}>
+        
+        {/* User Details */}
+        <div className="flex flex-col">
+          <h1 className="font-bold text-black dark:text-white text-2xl md:text-3xl lg:text-4xl">
             {user?.name || "Channel"}
-          </Typography>
-          <span className="block">@{user?.name} • {user?.subscribers} subscribers</span>
-          {/* <Button sx={{
-            backgroundColor: "#dc2626",
-            marginTop: "1rem",
-            color: "white"
-          }} className="block bg-red-600 text-white">
-            Subscribe
-          </Button> */}
-        </Box>
-      </Box>
+          </h1>
+          <span className="mt-1 text-gray-600 dark:text-gray-300 text-sm md:text-base">
+            @{user?.name} • {user?.subscribers || 0} subscribers
+          </span>
+        </div>
+      </div>
     </div>
   );
 };

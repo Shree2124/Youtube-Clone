@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   addVideo,
+  uploadChunk,
   getVideo,
   deleteVideo,
   updateVideo,
@@ -16,18 +17,22 @@ import { upload } from "../middlewares/multer.middleware.js";
 
 const router = new Router();
 
+// New route for chunk uploads
+router.route("/upload-chunk").post(
+  verifyJWT,
+  upload.fields([
+    { name: "chunk", maxCount: 1 }
+  ]),
+  uploadChunk
+);
+
+// Modified addVideo route - now handles the finalization after chunks are uploaded
 router.route("/add-video").post(
   verifyJWT,
-  upload.fields([{
-    name: "imgUrl",
-    maxCount: 1
-  },
-  {
-    name: "videoUrl",
-    maxCount: 1
-  }]),
   addVideo
 );
+
+// Existing routes
 router.route("/:id").patch(verifyJWT, updateVideo);
 router.route("/:id").delete(verifyJWT, deleteVideo);
 router.route("/find/:id").get(getVideo);

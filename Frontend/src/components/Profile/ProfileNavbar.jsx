@@ -1,45 +1,6 @@
+// ProfileNavbar.jsx - Navigation tabs
 import React from "react";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-
-const Main = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  background-color: ${({ theme }) => theme.bg};
-`;
-
-const Nav = styled.nav`
-  display: flex;
-  justify-content: center;
-`;
-
-const Ul = styled.ul`
-  display: flex;
-  list-style: none;
-  gap: 20px;
-  padding: 0;
-  margin: 0;
-`;
-
-const Li = styled.li`
-  color: ${({ theme }) => theme.text};
-  font-size: 1.2em;
-
-  a {
-    text-decoration: none;
-    color: inherit;
-    padding: 10px 15px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-
-    &:hover {
-      background-color: ${({ theme }) => theme.textSoft};
-      color: ${({ theme }) => theme.text};
-    }
-  }
-`;
+import { Link, useLocation } from "react-router-dom";
 
 const tabs = [
   {
@@ -57,18 +18,32 @@ const tabs = [
 ];
 
 const ProfileNavbar = () => {
+  const location = useLocation();
+  
   return (
-    <Main>
-      <Nav>
-        <Ul>
-          {tabs.map((i) => (
-            <Li key={crypto.randomUUID()}>
-              <Link to={i.path}>{i.name}</Link>
-            </Li>
-          ))}
-        </Ul>
-      </Nav>
-    </Main>
+    <div className="flex justify-center py-4 md:py-6 border-gray-200 dark:border-gray-700 border-b">
+      <nav>
+        <ul className="flex space-x-2 md:space-x-8">
+          {tabs.map((tab) => {
+            const isActive = location.pathname === tab.path;
+            return (
+              <li key={tab.path}>
+                <Link 
+                  to={tab.path}
+                  className={`px-4 py-2 rounded-lg transition-colors duration-200 text-black dark:text-white
+                    ${isActive 
+                      ? "bg-gray-100 dark:bg-gray-700 font-medium" 
+                      : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                >
+                  {tab.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </div>
   );
 };
 

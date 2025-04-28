@@ -30,7 +30,7 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
 
   // Format view count
   const formatViewCount = (count) => {
-    if (!count) return "0 views";
+    if (!count && count !== 0) return "0 views";
     if (count >= 1000000) {
       return Math.floor(count / 100000) / 10 + 'M views';
     } else if (count >= 1000) {
@@ -39,7 +39,7 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
     return count + ' views';
   };
 
-  // Format video duration
+  // Format video duration (placeholder for now)
   const formatDuration = (seconds) => {
     if (!seconds) return "0:00";
     const minutes = Math.floor(seconds / 60);
@@ -87,7 +87,7 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
       >
         <div className={`w-full h-full bg-gray-200 ${!imageLoaded ? 'animate-pulse' : ''}`}>
           <img 
-            src={video?.imgUrl} 
+            src={video?.thumbnail || video?.imgUrl} 
             alt={video?.title || "Video thumbnail"}
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
@@ -103,12 +103,7 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
           />
         </div>
         
-        {/* Video Duration Badge */}
-        {video?.duration && (
-          <span className="right-1 bottom-1 absolute bg-black bg-opacity-80 px-1.5 py-0.5 rounded font-medium text-white text-xs">
-            {formatDuration(video.duration)}
-          </span>
-        )}
+        {/* Video Duration Badge - Removed as it's not in the API data */}
         
         {/* Hover Options - Shows when hovering over thumbnail */}
         {isHovered && type !== "sm" && (
@@ -128,7 +123,7 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
         {/* Channel Avatar (only for default type) */}
         {type !== "sm" && (
           <Link 
-            to={`/channel/${channel?._id}`} 
+            to={`/channel/${channel?._id || (video?.owner?._id || '')}`} 
             className="flex-shrink-0 mt-1 mr-3"
           >
             <div className="rounded-full w-9 h-9 overflow-hidden">
@@ -156,9 +151,9 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
           </Link>
 
           {/* Channel Name & Verification */}
-          <Link to={`/channel/${channel?._id}`} className="group flex items-center mt-1">
+          <Link to={`/channel/${channel?._id || (video?.owner?._id || '')}`} className="group flex items-center mt-1">
             <p className="text-gray-500 dark:group-hover:text-gray-300 dark:text-gray-400 group-hover:text-gray-700 text-sm transition-colors duration-200">
-              {channel?.name || "Unknown Channel"}
+              {channel?.name || video?.owner?.name || "Unknown Channel"}
             </p>
             {channel?.verified && (
               <VerifiedIcon sx={{ fontSize: 14, marginLeft: 0.5 }} className="text-gray-500" />
@@ -171,6 +166,20 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
             <span className="mx-1">•</span>
             <span>{video?.createdAt ? format(video.createdAt) : "Unknown time"}</span>
           </div>
+
+          {/* Tags Display - Added based on API data */}
+          {video?.tags && video.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {video.tags.slice(0, 3).map((tag, index) => (
+                <span key={index} className="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300 text-xs">
+                  #{tag}
+                </span>
+              ))}
+              {video.tags.length > 3 && (
+                <span className="text-gray-500 text-xs">+{video.tags.length - 3}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Options Button (3 dots) */}
@@ -204,12 +213,5 @@ const Card = ({ type = "default", video, animDelay = 0 }) => {
     </div>
   );
 };
-
-// Add a global animation class in your CSS or tailwind config:
-// @keyframes fadeIn {
-//   from { opacity: 0; transform: translateY(10px); }
-//   to { opacity: 1; transform: translateY(0); }
-// }
-// .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
 
 export default Card;

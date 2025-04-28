@@ -1,50 +1,178 @@
+import multer from "multer";
 import { User } from "../models/user.model.js";
 import { Video } from "../models/video.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js"
+import fs from "fs"
 
+const tempDir = "./public/temp";
+const chunksDir = "./public/chunks";
+
+// Ensure directories exist
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
+}
+if (!fs.existsSync(chunksDir)) {
+  fs.mkdirSync(chunksDir, { recursive: true });
+}
+
+// Configure multer for handling file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, tempDir);
+  },
+  filename: function (req, file, cb) {
+    // Create unique filename to avoid collisions
+    const uniqueFilename = `${Date.now()}-${uuidv4()}-${file.originalname}`;
+    cb(null, uniqueFilename);
+  }
+});
+
+export const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // Limit each chunk to 10MB
+});
+
+// Handler for receiving chunks
+export const uploadChunk = asyncHandler(async (req, res) => {
+  const { chunkIndex, totalChunks, fileName, fileType, fieldName, fileId } = req.body;
+  
+  // If this is the first chunk, generate a new fileId
+  const uploadId = fileId || uuidv4();
+  const uploadDir = path.join(chunksDir, uploadId);
+  
+  // Create directory for this upload if it doesn't exist
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  
+  // Move the uploaded chunk from temp to chunks directory
+  const chunk = req.files?.chunk?.[0];
+  if (!chunk) {
+    throw new ApiError(400, "No chunk found in the request");
+  }
+  
+  // Save chunk with its index
+  const chunkPath = path.join(uploadDir, `chunk-${chunkIndex}`);
+  fs.renameSync(chunk.path, chunkPath);
+  
+  // If this is the first chunk, save the metadata
+  if (parseInt(chunkIndex) === 0) {
+    fs.writeFileSync(
+      path.join(uploadDir, "metadata.json"),
+      JSON.stringify({
+        fileName,
+        fileType,
+        fieldName,
+        totalChunks: parseInt(totalChunks),
+        uploadDate: new Date(),
+        ...((fieldName === "video" && req.body.title) ? {
+          title: req.body.title,
+          des: req.body.des,
+          tags: req.body.tags
+        } : {})
+      })
+    );
+  }
+  
+  // Return the fileId and chunk status
+  res.status(200).json(
+    new ApiResponse(
+      200, 
+      { 
+        fileId: uploadId, 
+        chunkIndex, 
+        received: true 
+      }, 
+      "Chunk received successfully"
+    )
+  );
+});
+
+// Function to merge chunks into a complete file
+const mergeChunks = async (fileId) => {
+  const uploadDir = path.join(chunksDir, fileId);
+  const metadataPath = path.join(uploadDir, "metadata.json");
+  
+  if (!fs.existsSync(metadataPath)) {
+    throw new ApiError(404, "Upload metadata not found");
+  }
+  
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+  const { fileName, totalChunks } = metadata;
+  
+  // Create a destination file
+  const destPath = path.join(tempDir, fileName);
+  const destStream = fs.createWriteStream(destPath);
+  
+  // Read and append each chunk in order
+  for (let i = 0; i < totalChunks; i++) {
+    const chunkPath = path.join(uploadDir, `chunk-${i}`);
+    if (!fs.existsSync(chunkPath)) {
+      throw new ApiError(400, `Chunk ${i} is missing`);
+    }
+    
+    // Read the chunk and append to destination file
+    await new Promise((resolve, reject) => {
+      const chunkStream = fs.createReadStream(chunkPath);
+      chunkStream.pipe(destStream, { end: false });
+      chunkStream.on('end', resolve);
+      chunkStream.on('error', reject);
+    });
+  }
+  
+  // Close the destination file
+  await new Promise((resolve) => {
+    destStream.end(resolve);
+  });
+  
+  // Clean up chunks
+  fs.rmSync(uploadDir, { recursive: true, force: true });
+  
+  return { path: destPath, metadata };
+};
+
+// Handler to finalize the upload and save the video
 const addVideo = asyncHandler(async (req, res) => {
-  const { title, des, tags } = req.body;
-
+  const { videoFileId, thumbnailFileId, title, des, tags } = req.body;
+  
+  if (!videoFileId || !thumbnailFileId) {
+    throw new ApiError(400, "Video and thumbnail file IDs are required");
+  }
+  
   if (!title) {
-    throw new ApiError(401, "Title is required");
+    throw new ApiError(400, "Title is required");
   }
+  
   if (!des) {
-    throw new ApiError(401, "Description is required");
+    throw new ApiError(400, "Description is required");
   }
-
-  // Extract file paths for video and image
-  let videoUrlLocalPath;
-  let imgUrlLocalPath;
-
-  if (req?.files?.videoUrl && Array.isArray(req.files.videoUrl) && req.files.videoUrl.length > 0) {
-    videoUrlLocalPath = req.files.videoUrl[0].path;
-  }
-  if (req?.files?.imgUrl && Array.isArray(req.files.imgUrl) && req.files.imgUrl.length > 0) {
-    imgUrlLocalPath = req.files.imgUrl[0].path;
-  }
-
-  if (!videoUrlLocalPath) {
-    throw new ApiError(401, "Video file is required");
-  }
-  if (!imgUrlLocalPath) {
-    throw new ApiError(401, "Image file is required");
-  }
-
-  const tagsArr = tags ? tags.split(",").map(tag => tag.trim()) : [];
-
+  
   try {
-    // Upload video and image in parallel
+    // Merge video chunks
+    const { path: videoPath } = await mergeChunks(videoFileId);
+    
+    // Merge thumbnail chunks
+    const { path: thumbnailPath } = await mergeChunks(thumbnailFileId);
+    
+    // Upload to Cloudinary
     const [videoUpload, imageUpload] = await Promise.all([
-      uploadOnCloudinary(videoUrlLocalPath),
-      uploadOnCloudinary(imgUrlLocalPath)
+      uploadOnCloudinary(videoPath),
+      uploadOnCloudinary(thumbnailPath)
     ]);
-
+    
     const videoUrl = videoUpload?.url;
     const imgUrl = imageUpload?.url;
-
+    
+    if (!videoUrl || !imgUrl) {
+      throw new ApiError(500, "Failed to upload files to storage");
+    }
+    
+    // Parse tags
+    const tagsArr = tags ? tags.split(",").map(tag => tag.trim()) : [];
+    
     // Save video details in the database
     const saveVideo = await Video.create({
       userId: req.user.id,
@@ -54,11 +182,18 @@ const addVideo = asyncHandler(async (req, res) => {
       title,
       des
     });
-
-    res.status(201).json(new ApiResponse(201, saveVideo, "Video uploaded successfully"));
+    
+    // Clean up temporary files
+    fs.unlinkSync(videoPath);
+    fs.unlinkSync(thumbnailPath);
+    
+    res.status(201).json(
+      new ApiResponse(201, saveVideo, "Video uploaded successfully")
+    );
+    
   } catch (error) {
-    console.error("Error uploading files:", error);
-    throw new ApiError(500, "File upload failed");
+    console.error("Error processing upload:", error);
+    throw new ApiError(500, `File upload failed: ${error.message}`);
   }
 });
 
