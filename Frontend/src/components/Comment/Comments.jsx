@@ -1,96 +1,52 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import ImgLogo from "../../Logo/logo-color.png";
-import { Avatar, Button } from "@mui/material";
-import { Comment } from "../index";
-import axiosInstance from "../../api/axios";
+import { Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
 import { useSelector } from "react-redux";
-
-const Container = styled.div`
-  padding: 1rem;
-  max-width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-  }
-`;
-
-const NewComment = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-
-  @media (max-width: 768px) {
-    gap: 0.5rem;
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-`;
-
-const Input = styled.input`
-  border: none;
-  border-bottom: 1px solid ${({ theme }) => theme.soft};
-  background: transparent;
-  padding: 5px;
-  outline: none;
-  color: ${({ theme }) => theme.text};
-  width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 3px;
-  }
-`;
-
-const StyledButton = styled(Button)`
-  background-color: blue !important;
-  color: white !important;
-  padding: 0.5rem 1rem;
-
-  @media (max-width: 480px) {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.9rem;
-  }
-`;
+import axiosInstance from "../../api/axios";
+import { Comment } from "../index";
 
 const Comments = ({ videoId }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state?.user);
-  console.log(user);
-
+  
   const [comments, setComments] = useState(null);
   const [comment, setComment] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchComments = async () => {
+    if (!videoId) return;
+    
     try {
+      setIsLoading(true);
       const res = await axiosInstance.get(`/comment/get-comments/${videoId}`);
       setComments(res.data.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleComment = async () => {
+    if (!comment.trim()) return;
+    
     try {
       if (user) {
+        setIsLoading(true);
         const res = await axiosInstance.post(`/comment/add-comment`, {
           desc: comment,
           videoId,
         });
-        console.log(res.data);
-
+        
         setComment("");
         fetchComments();
       } else {
-        navigate("/signin")
+        navigate("/signin");
       }
     } catch (error) {
       console.error("Error adding comment:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,30 +54,57 @@ const Comments = ({ videoId }) => {
     fetchComments();
   }, [videoId]);
 
-  if (!user) return <div>Loading...</div>;
+  if (!videoId) return null;
 
   return (
-    <Container>
-      <NewComment>
+    <div className="p-4 max-w-full">
+      <h3 className="mb-4 font-medium text-lg">
+        {comments?.length || 0} Comments
+      </h3>
+      
+      {/* New Comment Section */}
+      <div className="flex items-start gap-3 mb-6">
         <Avatar
           src={user?.avatar}
-          sx={{
-            height: "3.12rem",
-            width: "3.12rem",
-          }}
+          alt={user?.name || "User"}
+          className="w-10 h-10"
         />
-        <Input
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Add new Comment...."
-        />
-        <StyledButton onClick={handleComment}>Add</StyledButton>
-      </NewComment>
-      {comments?.length > 0 &&
-        comments.map((comment) => (
-          <Comment key={comment._id} comment={comment} />
-        ))}
-    </Container>
+        <div className="flex flex-col flex-1 gap-2">
+          <input
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Add a comment..."
+            className="bg-transparent px-2 py-2 border-gray-300 dark:border-gray-700 border-b focus:border-blue-500 outline-none w-full transition-all"
+          />
+          <div className="flex justify-end">
+            <button 
+              onClick={handleComment}
+              disabled={isLoading || !comment.trim()}
+              className={`bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors
+                ${(isLoading || !comment.trim()) ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              {isLoading ? 'Posting...' : 'Comment'}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Comments List */}
+      <div className="space-y-4">
+        {isLoading && !comments ? (
+          <div className="flex justify-center py-4">Loading comments...</div>
+        ) : comments?.length > 0 ? (
+          comments.map((comment) => (
+            <Comment key={comment._id} comment={comment} />
+          ))
+        ) : (
+          <div className="py-8 text-gray-500 text-center">
+            No comments yet. Be the first to comment!
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

@@ -9,15 +9,15 @@ import mongoose from "mongoose";
 
 
 const options = {
-  httpOnly: true,           
-  secure: true,              
-  sameSite: 'None',          
-  path: '/',                 
-  maxAge: 15 * 60 * 1000
+	httpOnly: true,
+	secure: process.env.NODE_ENV === 'development',
+	sameSite: 'none',
+	path: '/',
+	maxAge: 15 * 60 * 1000,
 };
 
 
-const generateAccessAndRefereshTokens = async (userId) => {
+const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
@@ -133,7 +133,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid user credentials");
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
 
@@ -208,7 +208,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const {
       accessToken,
       newRefreshToken,
-    } = await generateAccessAndRefereshTokens(user._id);
+    } = await generateAccessAndRefreshTokens(user._id);
 
     return res
       .status(200)

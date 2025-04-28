@@ -1,113 +1,34 @@
 import React, { useContext, useEffect, useState } from "react";
-import styled from "styled-components";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Avatar, Box, Typography } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import { Avatar, Box, IconButton, Typography } from "@mui/material";
-import { Menu, Close, ArrowDropDown } from "@mui/icons-material";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MobileContext from "../context/MobileContext.js";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import ImgLogo from "../../Logo/logo-color.png";
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axios.js";
-
-const Container = styled.div`
-  position: fixed;
-  top: 0;
-  background-color: ${({ theme }) => theme.bgLighter};
-  height: auto;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
-    0 6px 20px 0 ${({ theme }) => theme.bgLighter};
-  width: 100%;
-  padding-top: 0.4rem;
-  padding-bottom: 0.4rem;
-  padding-left: 3rem;
-  padding-right: 3rem;
-  z-index: 20;
-  color: ${({ theme }) => theme.text};
-`;
-
-const Img = styled.img`
-  height: 2.5rem;
-`;
-
-const Wrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0rem 1rem;
-`;
-
-const Search = styled.div`
-  width: 40%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.2rem;
-  border: 1px solid #ccc;
-  border-radius: 2rem;
-`;
-
-const Button = styled.button`
-  padding: 0.3rem 0.9rem;
-  background-color: transparent;
-  border: 1px solid #3ea6ff;
-  color: #3ea6ff;
-  border-radius: 0.18rem;
-  font-weight: 500;
-  margin-top: 0.6rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 0.5rem;
-  margin-left: 1rem;
-  outline: none;
-  color: ${({ theme }) => theme.text};
-`;
-
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-weight: bold;
-`;
-
-const Dropdown = styled(Box)`
-  position: absolute;
-  top: 100%;
-  right: 0;
-  padding: 1rem;
-  background-color: ${({ theme }) => theme.bgLighter};
-  color: ${({ theme }) => theme.text};
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  z-index: 110;
-`;
-
-const DropdownItem = styled(Typography)`
-  cursor: pointer;
-  padding: 0.6rem;
-  &:hover {
-    background-color: ${({ theme }) => theme.softHover};
-  }
-`;
+import ImgLogo from "../../Logo/logo-color.png";
+import { clearUser, setAuth } from "../../redux/slices/userSlice";
 
 const Navbar = ({ darkMode }) => {
-  const [color, setColor] = useState("white");
   const { auth, user } = useSelector((state) => state?.user);
   const { isMobile, setIsMobile } = useContext(MobileContext);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  
   const handleToggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${searchQuery}`);
+    }
   };
 
   const handleOptionClick = async (option) => {
@@ -116,117 +37,111 @@ const Navbar = ({ darkMode }) => {
     } else if (option === "Logout") {
       try {
         const res = await axiosInstance.post("/users/logout");
-        if(res.status === 200){
-          window.location.reload()
+        if (res.status === 200) {
+          // Update Redux store instead of reloading
+          dispatch(clearUser());
+          dispatch(setAuth(false));
+          navigate("/");
         }
       } catch (error) {
-        console.log(error);
+        console.error("Logout error:", error);
       }
     } else if (option === "Profile") {
       navigate("/profile/home");
     }
-    console.log(option);
     setDropdownOpen(false);
   };
 
   const handleMobileToggle = () => {
     setIsMobile((prev) => !prev);
-    console.log(isMobile);
   };
 
-  useEffect(() => {
-    setColor(darkMode ? "white" : "black");
-  }, [darkMode]);
-
   return (
-    <Container>
-      <Wrapper>
-        <div className="flex items-center justify-between gap-8">
-          <IconButton
-            sx={{
-              color,
-              display: { xs: "block", md: "block", sm: "block", lg: "block" },
-            }}
+    <div className={`fixed top-0 w-full z-20 py-2 px-4 md:px-8 shadow-md ${darkMode ? 'bg-zinc-900 text-white' : 'bg-white text-black'}`}>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          {/* Mobile menu toggle button - only visible on mobile */}
+          <button 
+            className="lg:hidden md:visible hover:bg-gray-200 hover:bg-opacity-20 p-2 rounded-full"
             onClick={handleMobileToggle}
           >
-            {!isMobile ? <Menu /> : <Close />}
-          </IconButton>
-          <Box
-            sx={{
-              display: { xs: "none", md: "none", lg: "block" },
-              position: "relative",
-              zIndex: 10,
-            }}
-          >
-            <Logo>
-              <Link
-                to={"/"}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                }}
-              >
-                <Img src={ImgLogo} />
-                <p>TuneTube</p>
-              </Link>
-            </Logo>
-          </Box>
+            {!isMobile ? <MenuIcon /> : <CloseIcon />}
+          </button>
+          
+          {/* Logo - shown on all screen sizes */}
+          <Link to="/" className="flex items-center gap-2">
+            <img src={ImgLogo} alt="TuneTube Logo" className="h-8" />
+            <span className="font-bold">TuneTube</span>
+          </Link>
         </div>
 
-        <Search>
-          <Input placeholder="Search" />
-          <SearchOutlinedIcon />
-        </Search>
+        {/* Search form - takes up available space but has max width */}
+        <form 
+          className="flex-grow mx-2 md:mx-4 max-w-md lg:max-w-xl"
+          onSubmit={handleSearch}
+        >
+          <div className={`flex items-center border rounded-full overflow-hidden ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+            <input
+              type="text" 
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full py-1 md:py-2 px-2 md:px-4 outline-none text-sm md:text-base ${darkMode ? 'bg-zinc-900 text-white' : 'bg-white text-black'}`}
+            />
+            <button 
+              type="submit"
+              className={`p-1 md:p-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+            >
+              <SearchOutlinedIcon fontSize="small" />
+            </button>
+          </div>
+        </form>
+
+        {/* Sign in button or user profile */}
         {!auth ? (
-          <Link
-            to={"/signin"}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            <Button>
-              <AccountCircleOutlinedIcon />
-              SIGN IN
-            </Button>
+          <Link to="/signin" className="flex items-center ml-2">
+            <button className="flex items-center gap-1 md:gap-2 hover:bg-blue-500 hover:bg-opacity-10 px-2 md:px-3 py-1 border border-blue-500 rounded text-blue-500 text-xs md:text-sm">
+              <AccountCircleOutlinedIcon fontSize="small" />
+              <span>SIGN IN</span>
+            </button>
           </Link>
         ) : (
-          <Box position="relative">
-            <Box display="flex" alignItems="center">
-              <Avatar
-                src={
-                  user?.avatar ||
-                  "https://www.w3schools.com/howto/img_avatar.png"
-                }
+          <div className="relative ml-2">
+            <div className="flex items-center cursor-pointer" onClick={handleToggleDropdown}>
+              <Avatar 
+                src={user?.avatar || "https://www.w3schools.com/howto/img_avatar.png"}
+                sx={{ width: { xs: 28, md: 32 }, height: { xs: 28, md: 32 } }}
               />
-              <Typography sx={{ ml: 1 }}>{user?.name || "User"}</Typography>
-              <IconButton onClick={handleToggleDropdown}>
-                <ArrowDropDown
-                  sx={{
-                    color,
-                  }}
-                />
-              </IconButton>
-            </Box>
+              <span className="hidden sm:block mr-1 ml-2 text-xl">{user?.name || "User"}</span>
+              <ArrowDropDownIcon />
+            </div>
 
             {isDropdownOpen && (
-              <Dropdown>
-                <DropdownItem onClick={() => handleOptionClick("Profile")}>
+              <div className={`absolute right-0 mt-2 w-40 md:w-48 rounded-md shadow-lg py-1 ${darkMode ? 'bg-zinc-800' : 'bg-white'}`}>
+                <div 
+                  className={`px-4 py-2 text-sm hover:bg-opacity-10 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'} cursor-pointer`}
+                  onClick={() => handleOptionClick("Profile")}
+                >
                   Profile
-                </DropdownItem>
-                <DropdownItem onClick={() => handleOptionClick("Logout")}>
-                  <span>Logout</span>
-                </DropdownItem>
-                <DropdownItem onClick={() => handleOptionClick("Upload Video")}>
-                  <Link to={"/upload-video"}>Upload Video</Link>
-                </DropdownItem>
-              </Dropdown>
+                </div>
+                <div 
+                  className={`px-4 py-2 text-sm hover:bg-opacity-10 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'} cursor-pointer`}
+                  onClick={() => handleOptionClick("Upload Video")}
+                >
+                  Upload Video
+                </div>
+                <div 
+                  className={`px-4 py-2 text-sm hover:bg-opacity-10 ${darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100'} cursor-pointer`}
+                  onClick={() => handleOptionClick("Logout")}
+                >
+                  Logout
+                </div>
+              </div>
             )}
-          </Box>
+          </div>
         )}
-      </Wrapper>
-    </Container>
+      </div>
+    </div>
   );
 };
 

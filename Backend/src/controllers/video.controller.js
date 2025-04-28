@@ -149,11 +149,88 @@ const getByTags = async (req, res, next) => {
 };
 
 const search = asyncHandler(async (req, res) => {
+  // Get the search query from the request
   const query = req.query.q;
-  const videos = await Video.find({
-    title: { $regex: query, $options: "i" },
-  }).limit(40);
-  res.status(200).json(new ApiResponse(200, videos));
+  
+  // Handle empty query
+  if (!query || query.trim() === "") {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, [], "Search query cannot be empty"));
+  }
+  
+  // Sanitize the query to prevent regex injection
+  const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  
+  try {
+    // Search in both title and tags using aggregation
+    const videos = await Video.aggregate([
+      {
+        $match: {
+          $or: [
+            { title: { $regex: sanitizedQuery, $options: "i" } },
+            { tags: { $regex: sanitizedQuery, $options: "i" } },
+            { description: { $regex: sanitizedQuery, $options: "i" } }
+          ],
+          isPublished: true // Only return published videos
+        }
+      },
+      // Add additional fields like view count, etc.
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "ownerDetails"
+        }
+      },
+      {
+        $unwind: "$ownerDetails"
+      },
+      // Project only needed fields
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          description: 1,
+          thumbnail: 1,
+          videoFile: 1,
+          duration: 1,
+          views: 1,
+          createdAt: 1,
+          "ownerDetails.name": 1,
+          "ownerDetails.username": 1,
+          "ownerDetails.avatar": 1
+        }
+      },
+      // Sort by most relevant and popular
+      {
+        $sort: {
+          views: -1, // Sort by views (most popular first)
+          createdAt: -1 // Then by date (newest first)
+        }
+      },
+      // Limit results
+      {
+        $limit: 40
+      }
+    ]);
+    
+    // Return the results
+    return res.status(200).json(new ApiResponse(
+      200, 
+      videos,
+      `Found ${videos.length} results for "${query}"`
+    ));
+  } catch (error) {
+    // Log the error for server-side debugging
+    console.error("Search error:", error);
+    
+    // Return appropriate error
+    return res
+      .status(500)
+      .json(new ApiResponse(500, [], "Error performing search. Please try again."));
+  }
 });
 
 export {

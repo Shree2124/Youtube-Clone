@@ -1,234 +1,121 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Box, Drawer, IconButton } from "@mui/material";
-import MobileContext from "../context/MobileContext.js";
-import styled from "styled-components";
-import ImgLogo from "../../Logo/logo-color.png";
+import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  Home as HomeIcon,
-  ExploreOutlined as ExploreOutlinedIcon,
-  SubscriptionsOutlined as SubscriptionsOutlinedIcon,
-  VideoLibraryOutlined as VideoLibraryOutlinedIcon,
-  HistoryOutlined as HistoryOutlinedIcon,
-  LibraryMusicOutlined as LibraryMusicOutlinedIcon,
-  SportsEsportsOutlined as SportsEsportsOutlinedIcon,
-  SportsBasketballOutlined as SportsBasketballOutlinedIcon,
-  MovieOutlined as MovieOutlinedIcon,
-  ArticleOutlined as ArticleOutlinedIcon,
-  LiveTvOutlined as LiveTvOutlinedIcon,
-  AccountCircleOutlined as AccountCircleOutlinedIcon,
-  SettingsOutlined as SettingsOutlinedIcon,
-  FlagOutlined as FlagOutlinedIcon,
-  HelpOutlineOutlined as HelpOutlineOutlinedIcon,
-  SettingsBrightnessOutlined as SettingsBrightnessOutlinedIcon,
-  Close,
-} from "@mui/icons-material";
 import { useSelector } from "react-redux";
+import { Drawer } from "@mui/material";
+import MobileContext from "../context/MobileContext.js";
+import ImgLogo from "../../Logo/logo-color.png";
 
-const Container = styled.div`
-  flex: 4;
-  width: fit-content;
-  background-color: ${({ theme }) => theme.bgLighter};
-  height: 100%;
-  color: ${({ theme }) => theme.text};
-  font-size: 14px;
-  position: fixed;
-  overflow: auto;
-  width: "100%";
-    
-  z-index: 10;
-`;
-
-const Wrapper = styled.div`
-  padding: 1.12rem 1.6rem;
-`;
-
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-weight: bold;
-  margin-bottom: 25px;
-`;
-
-const Img = styled.img`
-  height: 1.8rem;
-`;
-
-const Item = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  cursor: pointer;
-  padding: 7.5px 2px;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.soft};
-  }
-`;
-
-const Hr = styled.hr`
-  margin: 15px 0px;
-  border: 0.5px solid ${({ theme }) => theme.soft};
-`;
-
-const Login = styled.div`
-  width: fit-content;
-  display: "flex";
-`;
-
-const Button = styled.button`
-  padding: 0.5rem 0.5rem;
-  background-color: transparent;
-  border: 1px solid #3ea6ff;
-  color: #3ea6ff;
-  border-radius: 3px;
-  font-weight: 500;
-  margin-top: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const Title = styled.h2`
-  font-size: 14px;
-  font-weight: 500;
-  color: #aaaaaa;
-  margin-bottom: 20px;
-`;
+// Import icons
+import HomeIcon from "@mui/icons-material/Home";
+import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
+import SubscriptionsOutlinedIcon from "@mui/icons-material/SubscriptionsOutlined";
+import VideoLibraryOutlinedIcon from "@mui/icons-material/VideoLibraryOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import LibraryMusicOutlinedIcon from "@mui/icons-material/LibraryMusicOutlined";
+import SportsBasketballOutlinedIcon from "@mui/icons-material/SportsBasketballOutlined";
+import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
+import MovieOutlinedIcon from "@mui/icons-material/MovieOutlined";
+import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import LiveTvOutlinedIcon from "@mui/icons-material/LiveTvOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 
 const Menu = ({ darkMode, setDarkMode }) => {
   const auth = useSelector((state) => state.user.auth);
-  const [color, setColor] = useState("white");
   const { isMobile, setIsMobile } = useContext(MobileContext);
 
-  useEffect(() => {
-    setColor(darkMode ? "white" : "black");
-  }, [darkMode]);
+  const MenuItem = ({ icon, text, link }) => {
+    const Icon = icon;
+    
+    const content = (
+      <div className={`flex items-center gap-5 p-2 rounded-lg cursor-pointer ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'}`}>
+        <Icon fontSize="small" />
+        <span className="text-sm">{text}</span>
+      </div>
+    );
+
+    return link ? (
+      <Link to={link} className="text-inherit no-underline">
+        {content}
+      </Link>
+    ) : content;
+  };
 
   return (
-    <Container>
-      <Wrapper>
+    <div className={`h-full overflow-y-auto scrollbar-hide ${darkMode ? 'bg-zinc-900 text-white' : 'bg-white text-black'}`}>
+      <div className="p-4">
         {isMobile && (
-          <Box
-            sx={{
-              display: { xs: "block", sm: "block", md: "block", lg: "block" },
-              position: "relative",
-              zIndex: 10,
-            }}
-          >
-            <Logo>
-              <Link
-                to={"/"}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                }}
-              >
-                <Img src={ImgLogo} />
-                <p>TuneTube</p>
-              </Link>
-
-              <IconButton sx={{ color }} onClick={() => setIsMobile(!isMobile)}>
-                <Close />
-              </IconButton>
-            </Logo>
-          </Box>
+          <div className="flex justify-between items-center mb-6">
+            <Link to="/" className="flex items-center gap-3 text-inherit no-underline">
+              <img src={ImgLogo} alt="TuneTube Logo" className="h-6" />
+              <span className="font-bold">TuneTube</span>
+            </Link>
+            
+            <button 
+              className={`p-1 rounded-full ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'}`}
+              onClick={() => setIsMobile(false)}
+            >
+              <CloseIcon />
+            </button>
+          </div>
         )}
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Item>
-            {" "}
-            <HomeIcon /> Home{" "}
-          </Item>
-        </Link>
-        <Link to="/trends" style={{ textDecoration: "none", color: "inherit" }}>
-          <Item>
-            {" "}
-            <ExploreOutlinedIcon /> Explore{" "}
-          </Item>
-        </Link>
-        <Link
-          to="/subscriptions"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <Item>
-            {" "}
-            <SubscriptionsOutlinedIcon /> Subscriptions{" "}
-          </Item>
-        </Link>
-        <Hr />
-        <Item>
-          {" "}
-          <VideoLibraryOutlinedIcon /> Library{" "}
-        </Item>
-        <Item>
-          {" "}
-          <HistoryOutlinedIcon /> History{" "}
-        </Item>
-        <Hr />
+        
+        <MenuItem icon={HomeIcon} text="Home" link="/" />
+        <MenuItem icon={ExploreOutlinedIcon} text="Explore" link="/trends" />
+        <MenuItem icon={SubscriptionsOutlinedIcon} text="Subscriptions" link="/subscriptions" />
+        
+        <div className={`my-3 border-t ${darkMode ? 'border-zinc-800' : 'border-gray-200'}`}></div>
+        
+        <MenuItem icon={VideoLibraryOutlinedIcon} text="Library" />
+        <MenuItem icon={HistoryOutlinedIcon} text="History" />
+        
+        <div className={`my-3 border-t ${darkMode ? 'border-zinc-800' : 'border-gray-200'}`}></div>
+        
         {!auth && (
           <>
-            <div className="w-auto ">
-              <p>Sign in to like videos, comment, and subscribe.</p>
-              <Link to="/signin" style={{ textDecoration: "none" }}>
-                <Button>
-                  <AccountCircleOutlinedIcon />
-                  SIGN IN
-                </Button>
+            <div className="mb-4">
+              <p className="mb-2 text-sm">Sign in to like videos, comment, and subscribe.</p>
+              <Link to="/signin" className="no-underline">
+                <button className="flex items-center gap-2 hover:bg-blue-500 hover:bg-opacity-10 px-3 py-1 border border-blue-500 rounded text-blue-500">
+                  <AccountCircleOutlinedIcon fontSize="small" />
+                  <span>SIGN IN</span>
+                </button>
               </Link>
             </div>
-            <Hr />
+            <div className={`my-3 border-t ${darkMode ? 'border-zinc-800' : 'border-gray-200'}`}></div>
           </>
         )}
-        <Title>BEST OF LAMATUBE</Title>
-        <Item>
-          {" "}
-          <LibraryMusicOutlinedIcon /> Music{" "}
-        </Item>
-        <Item>
-          {" "}
-          <SportsBasketballOutlinedIcon /> Sports{" "}
-        </Item>
-        <Item>
-          {" "}
-          <SportsEsportsOutlinedIcon /> Gaming{" "}
-        </Item>
-        <Item>
-          {" "}
-          <MovieOutlinedIcon /> Movies{" "}
-        </Item>
-        <Item>
-          {" "}
-          <ArticleOutlinedIcon /> News{" "}
-        </Item>
-        <Item>
-          {" "}
-          <LiveTvOutlinedIcon /> Live{" "}
-        </Item>
-        <Hr />
-        <Item>
-          {" "}
-          <SettingsOutlinedIcon /> Settings{" "}
-        </Item>
-        <Item>
-          {" "}
-          <FlagOutlinedIcon /> Report{" "}
-        </Item>
-        <Item>
-          {" "}
-          <HelpOutlineOutlinedIcon /> Help{" "}
-        </Item>
-        <Item onClick={() => setDarkMode(!darkMode)}>
-          <SettingsBrightnessOutlinedIcon />
-          {darkMode ? "Light" : "Dark"} Mode
-        </Item>
-      </Wrapper>
-    </Container>
+        
+        <h3 className={`text-xs font-medium uppercase mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>
+          Best of TuneTube
+        </h3>
+        
+        <MenuItem icon={LibraryMusicOutlinedIcon} text="Music" />
+        <MenuItem icon={SportsBasketballOutlinedIcon} text="Sports" />
+        <MenuItem icon={SportsEsportsOutlinedIcon} text="Gaming" />
+        <MenuItem icon={MovieOutlinedIcon} text="Movies" />
+        <MenuItem icon={ArticleOutlinedIcon} text="News" />
+        <MenuItem icon={LiveTvOutlinedIcon} text="Live" />
+        
+        <div className={`my-3 border-t ${darkMode ? 'border-zinc-800' : 'border-gray-200'}`}></div>
+        
+        <MenuItem icon={SettingsOutlinedIcon} text="Settings" />
+        <MenuItem icon={FlagOutlinedIcon} text="Report" />
+        <MenuItem icon={HelpOutlineOutlinedIcon} text="Help" />
+        
+        <div 
+          className={`flex items-center gap-5 p-2 cursor-pointer ${darkMode ? 'hover:bg-zinc-800' : 'hover:bg-gray-100'}`}
+          onClick={() => setDarkMode(!darkMode)}
+        >
+          <SettingsBrightnessOutlinedIcon fontSize="small" />
+          <span className="text-sm">{darkMode ? "Light" : "Dark"} Mode</span>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -237,14 +124,23 @@ const MenuLayout = ({ darkMode, setDarkMode }) => {
 
   return (
     <>
-    <Box sx={{
-      display: {sm: "none", md:"none", xs: "none", lg:"none"},
-      paddingTop: {sm:"2rem", md: "2rem", lg:"4rem", xs: "2rem"}
-    }}>
-
-      <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
-    </Box>
-      <Drawer open={isMobile} onClose={handleClose}>
+      <div className="hidden lg:block top-14 bottom-0 left-0 z-10 fixed w-64">
+        <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
+      </div>
+      
+      <Drawer 
+        open={isMobile} 
+        onClose={handleClose}
+        sx={{
+          width: 240,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: 240,
+            boxSizing: 'border-box',
+            border: 'none',
+          },
+        }}
+      >
         <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
       </Drawer>
     </>

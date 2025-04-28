@@ -1,76 +1,24 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { format } from "timeago.js";
 import axiosInstance from "../api/axios";
+import VerifiedIcon from '@mui/icons-material/CheckCircle';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import WatchLaterOutlinedIcon from '@mui/icons-material/WatchLaterOutlined';
+import PlaylistAddOutlinedIcon from '@mui/icons-material/PlaylistAddOutlined';
 
-const Container = styled.div`
-  width: ${(props) => (props.type === "sm" ? "max-content" : "25rem")};
-  margin-bottom: ${(props) => (props.type === "sm" ? "0.65rem" : "2.813rem")};
-  cursor: pointer;
-  display: ${(props) => (props.type === "sm" ? "flex" : "inline")};
-  gap: 0.65rem;
-  
-  @media (max-width: 768px) {
-    width: 90%;
-    height: auto;
-  }
-`;
-
-const Image = styled.img`
-  width: ${(props) => (props.type === "sm" ? "12.7rem" : "100%")};
-  height: ${(props) => (props.type === "sm" ? "7.7rem" : "12.625rem")};
-  background-color: #999;
-  flex: 1;
-  
-  @media (max-width: 768px) {
-    width: 90%;
-    height: 45%;
-  }
-`;
-
-const Details = styled.div`
-  display: ${(props) => (props.type === "sm" ? "none" : "flex")};
-  margin-top: ${(props) => props.type !== "sm" && "16px"};
-  gap: 12px;
-  flex: 0 0 0%;
-  color: ${({ theme }) => theme.text};
-`;
-
-const ChannelImg = styled.img`
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-`;
-
-const Title = styled.h1`
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${({ theme }) => theme.text};
-`;
-
-const ChannelName = styled.h2`
-  font-size: 1rem;
-  color: ${({ theme }) => theme.textSoft};
-  margin: 0.53rem 0rem;
-`;
-
-const Info = styled.div`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.textSoft};
-`;
-
-const Texts = styled.div``;
-
-const Card = ({ type, video }) => {
+const Card = ({ type = "default", video, animDelay = 0 }) => {
   const [channel, setChannel] = useState({});
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const fetchChannel = async () => {
       if (video?.userId) {
         try {
           const res = await axiosInstance.get(`/users/find/${video.userId}`);
-          setChannel(res.data.data);
+          setChannel(res.data.data || {});
         } catch (error) {
           console.error("Error fetching channel data:", error);
         }
@@ -80,23 +28,188 @@ const Card = ({ type, video }) => {
     fetchChannel();
   }, [video?.userId]);
 
+  // Format view count
+  const formatViewCount = (count) => {
+    if (!count) return "0 views";
+    if (count >= 1000000) {
+      return Math.floor(count / 100000) / 10 + 'M views';
+    } else if (count >= 1000) {
+      return Math.floor(count / 100) / 10 + 'K views';
+    }
+    return count + ' views';
+  };
+
+  // Format video duration
+  const formatDuration = (seconds) => {
+    if (!seconds) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    const remainingSecs = Math.floor(seconds % 60);
+    
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMins = minutes % 60;
+      return `${hours}:${remainingMins.toString().padStart(2, '0')}:${remainingSecs.toString().padStart(2, '0')}`;
+    }
+    
+    return `${minutes}:${remainingSecs.toString().padStart(2, '0')}`;
+  };
+
+  // Animation delay based on card position
+  const getAnimationDelay = () => {
+    return `${50 + (animDelay * 50)}ms`;
+  };
+
   return (
-    <Container type={type}>
-      <Link to={`/video/${video._id}`}>
-        <Image type={type} src={video?.imgUrl} alt="Video Thumbnail" />
+    <div 
+      className={`
+        ${type === "sm" ? "flex gap-3 mb-3 max-w-full" : "flex flex-col mb-4 w-full"} 
+        transform transition-all duration-300 ease-out
+        hover:translate-y-[-4px]
+        opacity-0 animate-fadeIn
+      `}
+      style={{ 
+        animationDelay: getAnimationDelay(),
+        animationFillMode: 'forwards'
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setShowOptions(false);
+      }}
+    >
+      {/* Thumbnail Section */}
+      <Link 
+        to={`/video/${video?._id}`} 
+        className={`
+          ${type === "sm" ? "w-40 h-24 md:w-48 md:h-28" : "w-full aspect-video"} 
+          block overflow-hidden rounded-xl relative group
+        `}
+      >
+        <div className={`w-full h-full bg-gray-200 ${!imageLoaded ? 'animate-pulse' : ''}`}>
+          <img 
+            src={video?.imgUrl} 
+            alt={video?.title || "Video thumbnail"}
+            onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/480x270?text=Video";
+            }}
+            className={`
+              w-full h-full object-cover transition-all duration-300
+              ${imageLoaded ? 'opacity-100' : 'opacity-0'}
+              ${isHovered ? 'scale-110' : 'scale-100'}
+            `}
+            loading="lazy"
+          />
+        </div>
+        
+        {/* Video Duration Badge */}
+        {video?.duration && (
+          <span className="right-1 bottom-1 absolute bg-black bg-opacity-80 px-1.5 py-0.5 rounded font-medium text-white text-xs">
+            {formatDuration(video.duration)}
+          </span>
+        )}
+        
+        {/* Hover Options - Shows when hovering over thumbnail */}
+        {isHovered && type !== "sm" && (
+          <div className="right-1 bottom-8 absolute flex flex-col gap-1">
+            <button className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 p-1 rounded-full text-white transition-all duration-200">
+              <WatchLaterOutlinedIcon fontSize="small" />
+            </button>
+            <button className="bg-gray-800 bg-opacity-70 hover:bg-opacity-90 p-1 rounded-full text-white transition-all duration-200">
+              <PlaylistAddOutlinedIcon fontSize="small" />
+            </button>
+          </div>
+        )}
       </Link>
-      <Details type={type}>
-        <ChannelImg type={type} src={channel?.avatar} alt="Channel Avatar" />
-      </Details>
-      <Texts>
-        <Title>{video?.title}</Title>
-        <ChannelName>{channel?.name || "Unknown Channel"}</ChannelName>
-        <Info>
-          {video?.views} views • {format(video?.createdAt)}
-        </Info>
-      </Texts>
-    </Container>
+
+      {/* Info Section */}
+      <div className={`${type === "sm" ? "flex-1" : "flex mt-3"} relative`}>
+        {/* Channel Avatar (only for default type) */}
+        {type !== "sm" && (
+          <Link 
+            to={`/channel/${channel?._id}`} 
+            className="flex-shrink-0 mt-1 mr-3"
+          >
+            <div className="rounded-full w-9 h-9 overflow-hidden">
+              <img 
+                src={channel?.avatar || "https://www.w3schools.com/howto/img_avatar.png"} 
+                alt={channel?.name || "Channel"} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://www.w3schools.com/howto/img_avatar.png";
+                }}
+              />
+            </div>
+          </Link>
+        )}
+
+        <div className="flex-1 min-w-0">
+          {/* Video Title */}
+          <Link to={`/video/${video?._id}`} className="group block">
+            <h3 className={`font-medium ${
+              type === "sm" ? "text-sm line-clamp-2" : "text-base line-clamp-2"
+            } group-hover:text-blue-500 transition-colors duration-200`}>
+              {video?.title || "Untitled Video"}
+            </h3>
+          </Link>
+
+          {/* Channel Name & Verification */}
+          <Link to={`/channel/${channel?._id}`} className="group flex items-center mt-1">
+            <p className="text-gray-500 dark:group-hover:text-gray-300 dark:text-gray-400 group-hover:text-gray-700 text-sm transition-colors duration-200">
+              {channel?.name || "Unknown Channel"}
+            </p>
+            {channel?.verified && (
+              <VerifiedIcon sx={{ fontSize: 14, marginLeft: 0.5 }} className="text-gray-500" />
+            )}
+          </Link>
+
+          {/* Video Stats */}
+          <div className="flex items-center mt-1 text-gray-500 dark:text-gray-400 text-xs">
+            <span>{formatViewCount(video?.views)}</span>
+            <span className="mx-1">•</span>
+            <span>{video?.createdAt ? format(video.createdAt) : "Unknown time"}</span>
+          </div>
+        </div>
+
+        {/* Options Button (3 dots) */}
+        {isHovered && (
+          <button 
+            className="top-0 right-0 absolute hover:bg-gray-200 dark:hover:bg-gray-700 p-1 rounded-full transition-colors duration-200"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowOptions(!showOptions);
+            }}
+          >
+            <MoreVertIcon fontSize="small" />
+          </button>
+        )}
+
+        {/* Options Dropdown Menu */}
+        {showOptions && (
+          <div className="top-6 right-0 z-10 absolute bg-white dark:bg-gray-800 shadow-lg py-1 rounded-md w-48">
+            <button className="hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 w-full text-sm text-left transition-colors duration-150">
+              Not interested
+            </button>
+            <button className="hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 w-full text-sm text-left transition-colors duration-150">
+              Don't recommend channel
+            </button>
+            <button className="hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 w-full text-sm text-left transition-colors duration-150">
+              Report
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
+
+// Add a global animation class in your CSS or tailwind config:
+// @keyframes fadeIn {
+//   from { opacity: 0; transform: translateY(10px); }
+//   to { opacity: 1; transform: translateY(0); }
+// }
+// .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
 
 export default Card;
